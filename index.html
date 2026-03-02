@@ -3,345 +3,544 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niovi AI - Strategic Intelligence Hub</title>
+    <title>Niovi AI - Strategic Workspace</title>
     <style>
         :root {
+            --bg-nav: #0f172a;
             --bg-sidebar: #f8fafc; 
             --bg-chat: #ffffff;
             --text-main: #0f172a;
             --text-secondary: #64748b;
             --accent-blue: #2563eb;
-            --accent-dark: #1e3a8a;
+            --accent-red: #ef4444;
             --border: #e2e8f0;
             --white: #ffffff;
-            --success-green: #22c55e;
+            --sidebar-width: 350px;
+            --nav-width: 85px;
         }
 
         body { 
-            font-family: 'Inter', -apple-system, system-ui, sans-serif; 
-            background-color: var(--bg-chat); 
+            font-family: 'Inter', sans-serif; 
             margin: 0; 
             display: flex; 
             height: 100vh; 
             color: var(--text-main); 
             overflow: hidden;
+            background: var(--bg-chat);
         }
 
-        /* Sidebar Layout Fix */
-        .sidebar { 
-            width: 400px; 
-            min-width: 400px;
-            background-color: var(--bg-sidebar); 
-            border-right: 1px solid var(--border); 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh;
-            box-sizing: border-box; 
-        }
-
-        .sidebar-header {
-            padding: 24px 24px 10px 24px;
+        /* Global Navigation */
+        .global-nav {
+            width: var(--nav-width);
+            background: var(--bg-nav);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 25px;
+            z-index: 500;
             flex-shrink: 0;
         }
-        
-        .profile-section { text-align: center; margin-bottom: 15px; }
-        .profile-frame { 
-            width: 60px; height: 60px; border-radius: 16px; overflow: hidden; 
-            margin: 0 auto 10px; border: 2px solid var(--accent-blue);
-            padding: 2px; background: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
-        }
-        .profile-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-        .persona-name { font-size: 18px; font-weight: 800; color: var(--accent-dark); margin: 0; letter-spacing: -0.5px; }
-        .persona-title { font-size: 10px; color: var(--text-secondary); margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
 
-        /* Scrollable Feed Area */
-        .sidebar-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 24px;
+        /* Logo Styling */
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
             margin-bottom: 10px;
         }
 
-        .widget-header { 
-            display: flex; justify-content: space-between; align-items: center;
-            margin: 20px 0 12px 0; 
-            position: sticky;
-            top: 0;
-            background: var(--bg-sidebar);
-            z-index: 10;
+        .logo-text {
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(37, 99, 235, 0.8);
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #94a3b8;
+            border: none;
+            background: transparent;
+            width: 100%;
             padding: 5px 0;
         }
-        .widget-title { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .refresh-btn { font-size: 10px; cursor: pointer; color: var(--accent-blue); font-weight: 800; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 6px; background: #eff6ff; }
 
-        .news-card {
-            background: white; border: 1px solid var(--border); border-radius: 12px;
-            padding: 12px; margin-bottom: 10px; transition: all 0.2s ease;
-            text-decoration: none; color: inherit; display: block;
-        }
-        .news-card:hover { transform: translateY(-1px); border-color: var(--accent-blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .meta-category { font-size: 9px; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; background: #eff6ff; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
-        .news-headline { font-size: 12.5px; font-weight: 700; line-height: 1.4; color: var(--text-main); }
-
-        /* Fixed Knowledge Hub Area */
-        .sidebar-footer {
-            padding: 20px 24px 24px 24px;
-            background: white;
-            border-top: 1px solid var(--border);
-            flex-shrink: 0;
+        .nav-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
         }
 
-        .hub-panel { border-radius: 12px; }
-        .hub-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; height: 70px; font-size: 12px; padding: 10px; resize: none; box-sizing: border-box; font-family: inherit; margin-bottom: 10px; background: #f8fafc; }
-        .hub-btn { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-        .hub-btn:hover { opacity: 0.9; }
-        .hub-btn:disabled { background: #cbd5e1; }
-        .hub-status { font-size: 10px; margin-top: 8px; text-align: center; color: var(--text-secondary); font-weight: 600; }
-        #cloud-status.active { color: var(--success-green); }
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-        /* Main Chat Area */
-        .main-chat { flex: 1; display: flex; flex-direction: column; background: var(--white); }
-        #chat-window { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 24px; }
-        .message { max-width: 80%; padding: 16px 20px; font-size: 14px; line-height: 1.6; border-radius: 20px; position: relative; }
+        .nav-item.active .nav-icon { background: var(--accent-blue); color: white; }
+        .nav-item.active .nav-label { color: white; }
+        .nav-item:hover:not(.active) .nav-icon { background: #1e293b; color: white; }
+
+        /* Sidebar Drawer */
+        .sidebar-drawer {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: none; 
+            flex-direction: column;
+            height: 100vh;
+            z-index: 400;
+            box-shadow: 10px 0 15px -3px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-drawer.open { display: flex; }
+        .drawer-header { padding: 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .drawer-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+        /* Buttons */
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Chat List Items */
+        .chat-history-item {
+            position: relative;
+            padding: 12px; 
+            background: white; 
+            border: 1px solid var(--border);
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-history-item:hover { border-color: var(--accent-blue); background: #f1f5f9; }
+        .chat-history-item.active { border-color: var(--accent-blue); background: #eff6ff; }
+        
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-history-title { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .chat-history-date { font-size: 10px; color: var(--text-secondary); }
+        
+        .delete-chat-btn {
+            padding: 8px;
+            color: var(--text-secondary);
+            border-radius: 6px;
+            transition: all 0.2s;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .delete-chat-btn:hover { color: var(--accent-red); background: #fee2e2; }
+
+        /* Chat Window */
+        .main-chat { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+        #chat-window { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 20px; }
+        .message { max-width: 80%; padding: 14px 18px; font-size: 14px; line-height: 1.5; border-radius: 18px; }
         .user { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
-        .bot { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
-        .strategy-badge { position: absolute; top: -16px; left: 10px; font-size: 8px; font-weight: 900; color: var(--accent-blue); text-transform: uppercase; background: white; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border); }
+        .bot { align-self: flex-start; background: #f1f5f9; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+        
+        .input-area { padding: 20px 10% 30px; background: white; border-top: 1px solid var(--border); }
+        .input-box { display: flex; gap: 10px; background: #f8fafc; padding: 10px 15px; border-radius: 30px; border: 1px solid var(--border); }
+        .input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; }
 
-        .input-area { padding: 20px 10% 30px; background: white; }
-        .input-box { display: flex; gap: 12px; background: #f8fafc; padding: 10px 15px; border-radius: 40px; border: 1px solid var(--border); }
-        .input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; padding-left: 10px; }
-        .send-trigger { background: var(--accent-blue); color: white; border: none; padding: 8px 24px; border-radius: 20px; cursor: pointer; font-weight: 700; }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .loading-text { font-size: 11px; color: var(--accent-blue); text-align: center; padding: 20px; }
+        /* News & Hub */
+        .news-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
+        .news-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .hub-input { width: 100%; height: 80px; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
+        .loading-dots { font-size: 11px; color: var(--accent-blue); text-align: center; padding: 10px; }
+        #knowledge-stats { font-size: 10px; text-align: center; margin-top: 8px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="profile-section">
-            <div class="profile-frame">
-                <img src="https://ui-avatars.com/api/?name=Niovi+AI&background=2563eb&color=fff&bold=true" alt="Niovi AI">
-            </div>
-            <h1 class="persona-name">NioviAI</h1>
-            <div class="persona-title">Strategic Marketing Hub</div>
+<nav class="global-nav">
+    <div class="logo-container">
+        <img src="https://ui-avatars.com/api/?name=N&background=2563eb&color=fff" style="width: 38px; border-radius: 10px;" alt="Logo">
+        <span class="logo-text">NioviAI</span>
+    </div>
+    
+    <button class="nav-item" id="nav-chats" onclick="toggleDrawer('chats')">
+        <div class="nav-icon">💬</div>
+        <div class="nav-label">Chat</div>
+    </button>
+    
+    <button class="nav-item" id="nav-intel" onclick="toggleDrawer('intel')">
+        <div class="nav-icon">⚡</div>
+        <div class="nav-label">Intelligence</div>
+    </button>
+</nav>
+
+<aside class="sidebar-drawer" id="sidebar-drawer">
+    <div class="drawer-header">
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <h2 id="drawer-title" style="margin:0; font-size: 15px; font-weight: 800; text-transform: uppercase;">Chat History</h2>
+            <button onclick="closeDrawer()" style="border:none; background:none; cursor:pointer; font-size:18px;">✕</button>
         </div>
     </div>
+    <div class="drawer-content" id="drawer-content"></div>
+</aside>
 
-    <div class="sidebar-scroll-area">
-        <div class="widget-header">
-            <div class="widget-title">Intelligence Feed</div>
-            <span class="refresh-btn" onclick="fetchLiveNews()">Refresh</span>
-        </div>
-        <div id="intelligence-feed"></div>
-    </div>
-
-    <div class="sidebar-footer">
-        <div class="widget-title" style="margin-bottom: 12px;">Strategic Knowledge Hub</div>
-        <div class="hub-panel">
-            <div id="cloud-status" style="font-size: 9px; color: var(--text-secondary); margin-bottom: 8px; font-weight: bold;">Firebase: Connecting...</div>
-            <textarea id="hub-input" class="hub-input" placeholder="Προσθήκη στρατηγικής γνώσης..."></textarea>
-            <button id="update-memory-btn" class="hub-btn" onclick="syncKnowledge()">Update Strategic Memory</button>
-            <div id="memory-stats" class="hub-status">0 Strategic Nodes</div>
-        </div>
-    </div>
-</div>
-
-<div class="main-chat">
+<main class="main-chat">
     <div id="chat-window"></div>
     <div class="input-area">
         <div class="input-box">
-            <input type="text" id="user-input" placeholder="Συνομιλήστε με τη NioviAI...">
-            <button class="send-trigger" onclick="handleChat()">Send</button>
+            <input type="text" id="user-input" placeholder="Πώς μπορώ να βοηθήσω;" autocomplete="off">
+            <button onclick="handleChat()" style="background:var(--accent-blue); color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:700; cursor:pointer;">Send</button>
         </div>
     </div>
-</div>
+</main>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, query, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE",
-        authDomain: "niovi-ai.firebaseapp.com",
-        projectId: "niovi-ai",
-        storageBucket: "niovi-ai.firebasestorage.app",
-        messagingSenderId: "743828032118",
-        appId: "1:743828032118:web:fea3e038104e1c84b86d57"
-    };
-
+    const firebaseConfig = JSON.parse('{"apiKey":"AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE","authDomain":"niovi-ai.firebaseapp.com","projectId":"niovi-ai","storageBucket":"niovi-ai.firebasestorage.app","messagingSenderId":"743828032118","appId":"1:743828032118:web:fea3e038104e1c84b86d57"}');
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const APP_ID = "niovi-strategic-final-v1"; 
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'niovi-workspace-v3';
+    const apiKey = ""; 
 
-    let userInstance = null;
-    let globalKnowledgeContext = "";
-    let chatHistoryContext = "";
+    let currentUser = null;
+    let activeChatId = null;
+    let globalKnowledge = "";
+    let currentDrawerType = null;
+    let newsCache = null;
+    let chatUnsubscribe = null;
 
-    onAuthStateChanged(auth, async (user) => {
-        const statusEl = document.getElementById('cloud-status');
-        if (!user) {
-            try { await signInAnonymously(auth); } catch (e) { statusEl.innerText = "Firebase: Error"; }
-        } else {
-            userInstance = user;
-            statusEl.innerText = "Firebase: Cloud Connected ✓";
-            statusEl.classList.add('active');
-            
-            document.getElementById('chat-window').innerHTML = "";
-            await loadChatHistory();
-            startMemorySync();
-            
-            if (chatHistoryContext.trim() === "") {
-                appendMessage("NioviAI Online. Έτοιμη για στρατηγική υποστήριξη. Πώς μπορώ να σας βοηθήσω σήμερα;", 'bot');
+    // --- UTILS ---
+    async function apiFetchWithRetry(url, options, retries = 5, delay = 1000) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (response.ok) return await response.json();
+                throw new Error("API call failed");
+            } catch (err) {
+                if (i === retries - 1) throw err;
+                await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+            }
+        }
+    }
+
+    // --- AUTHENTICATION ---
+    const initAuth = async () => {
+        try {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && __initial_auth_token.length > 10) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (err) {
+            await signInAnonymously(auth);
+        }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+            syncKnowledgeHub();
+            if (!activeChatId) {
+                startNewChat();
             }
         }
     });
 
-    async function loadChatHistory() {
+    initAuth();
+
+    // --- FIRESTORE LOGIC ---
+    function syncKnowledgeHub() {
+        if (!currentUser) return;
+        const knowledgeRef = collection(db, 'artifacts', appId, 'public', 'data', 'knowledge');
+        onSnapshot(knowledgeRef, (snap) => {
+            let combinedText = "";
+            snap.forEach(d => {
+                combinedText += (d.data().text || "") + " ";
+            });
+            globalKnowledge = combinedText.trim();
+            const stats = document.getElementById('knowledge-stats');
+            if (stats) {
+                stats.innerHTML = snap.size === 0 
+                    ? "<span style='color:orange;'>Κενή Μνήμη</span>"
+                    : `<span style='color:green;'>${snap.size} Στοιχεία στη Μνήμη ✓</span>`;
+            }
+        }, (err) => {
+            console.error("Sync Error:", err);
+        });
+    }
+
+    window.startNewChat = async function() {
+        if (!currentUser) return;
+        activeChatId = "chat_" + Date.now();
+        document.getElementById('chat-window').innerHTML = "";
         try {
-            const q = query(
-                collection(db, 'artifacts', APP_ID, 'public', 'data', 'chat_history'),
-                orderBy('timestamp', 'asc'),
-                limit(10)
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_sessions', activeChatId), {
+                title: "Νέα Συνομιλία",
+                timestamp: new Date().toISOString(),
+                uid: currentUser.uid
+            });
+            appendMessage("Γεια σας! Είμαι η NioviAI. Πώς μπορώ να βοηθήσω στη στρατηγική σας;", 'bot');
+            if (currentDrawerType === 'chats') loadChatList();
+        } catch (e) {
+            console.error("Error starting chat:", e);
+        }
+    };
+
+    function loadChatList() {
+        const content = document.getElementById('drawer-content');
+        if (!content) return;
+        content.innerHTML = `<button class="new-chat-btn" onclick="startNewChat()">+ Νέα Συνομιλία</button><div id="list-container"></div>`;
+        
+        if (chatUnsubscribe) chatUnsubscribe();
+
+        const q = collection(db, 'artifacts', appId, 'public', 'data', 'chat_sessions');
+        chatUnsubscribe = onSnapshot(q, (snap) => {
+            const container = document.getElementById('list-container');
+            if (!container) return;
+            
+            const sessions = [];
+            snap.forEach(d => {
+                if (d.exists()) sessions.push({ id: d.id, ...d.data() });
+            });
+            sessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            container.innerHTML = "";
+            sessions.forEach(data => {
+                const item = document.createElement('div');
+                item.id = `chat-row-${data.id}`;
+                item.className = `chat-history-item ${data.id === activeChatId ? 'active' : ''}`;
+                item.innerHTML = `
+                    <div class="chat-info" onclick="switchChat('${data.id}')">
+                        <div class="chat-history-title">${data.title || "Chat"}</div>
+                        <div class="chat-history-date">${data.timestamp ? new Date(data.timestamp).toLocaleDateString('el-GR') : ''}</div>
+                    </div>
+                    <button class="delete-chat-btn" title="Delete" onclick="deleteChat(event, '${data.id}')">🗑️</button>
+                `;
+                container.appendChild(item);
+            });
+        }, (err) => console.error("List Error:", err));
+    }
+
+    window.switchChat = async function(id) {
+        activeChatId = id;
+        const win = document.getElementById('chat-window');
+        win.innerHTML = "<div class='loading-dots'>Φόρτωση...</div>";
+        
+        const q = collection(db, 'artifacts', appId, 'public', 'data', 'messages', id, 'logs');
+        const snap = await getDocs(q);
+        
+        const msgs = [];
+        snap.forEach(m => msgs.push(m.data()));
+        msgs.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+        
+        win.innerHTML = "";
+        if (msgs.length === 0) {
+             appendMessage("Γεια σας! Είμαι η NioviAI. Πώς μπορώ να βοηθήσω στη στρατηγική σας;", 'bot');
+        } else {
+             msgs.forEach(m => appendMessage(m.text, m.role, false));
+        }
+        refreshDrawerContent();
+    };
+
+    window.deleteChat = async function(e, id) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        if (!confirm("Are you sure you want to delete this chat?")) return;
+        
+        try {
+            // UI Feedback
+            const row = document.getElementById(`chat-row-${id}`);
+            if (row) row.style.opacity = '0.3';
+
+            // Firestore Delete
+            const chatRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_sessions', id);
+            await deleteDoc(chatRef);
+
+            if (activeChatId === id) {
+                startNewChat();
+            }
+        } catch (err) {
+            console.error("Delete failed:", err);
+            alert("Delete failed. Please try again.");
+            if (row) row.style.opacity = '1';
+        }
+    };
+
+    window.toggleDrawer = function(type) {
+        if (currentDrawerType === type) { closeDrawer(); return; }
+        currentDrawerType = type;
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('nav-' + type)?.classList.add('active');
+        document.getElementById('sidebar-drawer').classList.add('open');
+        refreshDrawerContent();
+    };
+
+    window.closeDrawer = function() {
+        document.getElementById('sidebar-drawer').classList.remove('open');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        currentDrawerType = null;
+    };
+
+    function refreshDrawerContent() {
+        const title = document.getElementById('drawer-title');
+        if (currentDrawerType === 'chats') {
+            title.innerText = "Chat History";
+            loadChatList();
+        } else if (currentDrawerType === 'intel') {
+            title.innerText = "Intelligence Hub";
+            loadIntelHub();
+        }
+    }
+
+    function loadIntelHub() {
+        const content = document.getElementById('drawer-content');
+        if (!content) return;
+        content.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="font-size:11px; font-weight:800; color:var(--text-secondary);">INTELLIGENCE FEED</span>
+                <button class="refresh-btn" onclick="fetchNews()" style="font-size:10px; cursor:pointer; background:none; border:1px solid var(--border); padding:2px 6px; border-radius:4px;">Search</button>
+            </div>
+            <div id="intel-feed-container"></div>
+            <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
+            <div style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:10px;">INTELLIGENCE MEMORY TRAIN</div>
+            <textarea id="hub-input" class="hub-input" placeholder="Feed me information :)"></textarea>
+            <button id="save-k-btn" onclick="saveKnowledge()" style="width:100%; padding:10px; background:var(--accent-blue); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Learn</button>
+            <div id="knowledge-stats" style="color:var(--text-secondary); margin-top:10px; text-align:center; font-size:10px;"></div>
+        `;
+        renderNews();
+        syncKnowledgeHub(); 
+    }
+
+    function renderNews() {
+        const container = document.getElementById('intel-feed-container');
+        if (!container) return;
+        container.innerHTML = newsCache || "<div style='font-size:12px; color:gray; text-align:center; padding:10px;'>Click Search for updates.</div>";
+    }
+
+    window.fetchNews = async function() {
+        const container = document.getElementById('intel-feed-container');
+        if (!container) return;
+        container.innerHTML = "<div class='loading-dots'>Searching Google...</div>";
+        try {
+            const result = await apiFetchWithRetry(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Find 3 extremely recent strategic business/AI news in Greece. Output ONLY a raw JSON array: [{'title': '...', 'url': '...'}]" }] }],
+                        tools: [{ "google_search": {} }]
+                    })
+                }
             );
-            const querySnapshot = await getDocs(q);
-            let historyText = "";
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
-                appendMessage(data.text, data.role, false);
-                historyText += `${data.role}: ${data.text}\n`;
-            });
-            chatHistoryContext = historyText;
-        } catch(e) { console.error("History load error", e); }
-    }
+            let textRaw = result.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+            textRaw = textRaw.replace(/```json/g, "").replace(/```/g, "").trim();
+            const news = JSON.parse(textRaw);
+            newsCache = news.map(n => `
+                <a href="${n.url}" target="_blank" class="news-card">
+                    <div style="font-size:12px; font-weight:700; color:var(--accent-blue);">${n.title}</div>
+                    <div style="font-size:9px; color:gray; margin-top:4px;">${new URL(n.url).hostname}</div>
+                </a>
+            `).join('');
+            renderNews();
+        } catch (e) { 
+            container.innerHTML = "<div style='font-size:11px; color:red; text-align:center;'>Error loading feed.</div>"; 
+        }
+    };
 
-    function startMemorySync() {
-        const q = collection(db, 'artifacts', APP_ID, 'public', 'data', 'knowledge_hub');
-        onSnapshot(q, (snapshot) => {
-            let context = "";
-            let count = 0;
-            snapshot.forEach(doc => {
-                context += "\n- " + doc.data().text;
-                count++;
-            });
-            globalKnowledgeContext = context;
-            document.getElementById('memory-stats').innerText = `${count} Strategic Nodes Connected`;
-        }, (err) => console.error("Sync error", err));
-    }
-
-    async function saveMessageToCloud(text, role) {
-        if (!userInstance) return;
-        try {
-            await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'chat_history'), {
-                text: text,
-                role: role,
-                timestamp: new Date().toISOString(),
-                uid: userInstance.uid
-            });
-        } catch (e) { console.error("Save error", e); }
-    }
-
-    window.syncKnowledge = async function() {
-        const input = document.getElementById('hub-input');
-        const val = input.value.trim();
-        const btn = document.getElementById('update-memory-btn');
-        if (!val || !userInstance) return;
-        btn.innerText = "Syncing...";
+    window.saveKnowledge = async function() {
+        const val = document.getElementById('hub-input').value.trim();
+        if (!val || !currentUser) return;
+        const btn = document.getElementById('save-k-btn');
         btn.disabled = true;
+        btn.innerText = "Learning...";
         try {
-            await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'knowledge_hub'), {
-                text: val,
-                timestamp: new Date().toISOString(),
-                uid: userInstance.uid
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'knowledge'), {
+                text: val, timestamp: new Date().toISOString(), uid: currentUser.uid
             });
-            input.value = "";
-            btn.innerText = "Updated ✓";
-            setTimeout(() => { btn.innerText = "Update Strategic Memory"; btn.disabled = false; }, 2000);
-        } catch (e) { btn.disabled = false; btn.innerText = "Error"; }
-    }
-
-    const GEMINI_KEY = ""; 
-    const MODEL_ID = "gemini-2.5-flash-preview-09-2025";
+            document.getElementById('hub-input').value = "";
+            btn.innerText = "Learned!";
+        } catch (e) { btn.innerText = "Error!"; }
+        setTimeout(() => { btn.disabled = false; btn.innerText = "Learn"; }, 1500);
+    };
 
     window.handleChat = async function() {
         const input = document.getElementById('user-input');
         const text = input.value.trim();
-        if (!text) return;
+        if (!text || !activeChatId || !currentUser) return;
         
         appendMessage(text, 'user');
-        saveMessageToCloud(text, 'user');
         input.value = "";
-
-        const systemPrompt = `Persona: NioviAI Strategic Marketing Expert. Hub Memory: ${globalKnowledgeContext}. History: ${chatHistoryContext}. Only Greek language. Professional tone.`;
-
+        const currentId = activeChatId;
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: systemPrompt + "\nUser: " + text }] }],
-                    tools: [{ "google_search": {} }]
-                })
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', currentId, 'logs'), { 
+                text, role: 'user', timestamp: new Date().toISOString() 
             });
-            const data = await res.json();
-            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Συγγνώμη, υπήρξε ένα σφάλμα.";
-            
+            const result = await apiFetchWithRetry(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Είσαι η NioviAI, ένας στρατηγικός βοηθός. Χρησιμοποίησε την εξής μνήμη αν χρειάζεται: ${globalKnowledge}. Ερώτηση χρήστη: ${text}` }] }]
+                    })
+                }
+            );
+            const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Σφάλμα απόκρισης.";
             appendMessage(reply, 'bot');
-            saveMessageToCloud(reply, 'bot');
-            chatHistoryContext += `user: ${text}\nbot: ${reply}\n`;
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', currentId, 'logs'), { 
+                text: reply, role: 'bot', timestamp: new Date().toISOString() 
+            });
         } catch (e) { 
-            appendMessage("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.", 'bot'); 
+            appendMessage("Σφάλμα σύνδεσης με τη βάση δεδομένων ή το AI.", 'bot'); 
         }
     };
 
-    function appendMessage(text, type, scroll = true) {
+    function appendMessage(text, role, scroll = true) {
         const win = document.getElementById('chat-window');
+        if (!win) return;
         const div = document.createElement('div');
-        div.className = `message ${type === 'user' ? 'user' : 'bot'}`;
-        if (type !== 'user') div.innerHTML = `<div class="strategy-badge">Niovi Strategy</div>`;
-        div.innerHTML += text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        div.className = `message ${role}`;
+        div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         win.appendChild(div);
         if (scroll) win.scrollTop = win.scrollHeight;
     }
 
-    window.fetchLiveNews = async function() {
-        const feed = document.getElementById('intelligence-feed');
-        feed.innerHTML = "<div class='loading-text'>Scanning Intelligence...</div>";
-        
-        try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    contents: [{ parts: [{ text: `Search for top 4 AI Law and Tech Marketing news for Greece/EU (Feb/March 2025). Return raw JSON array: [{"title": "...", "url": "...", "category": "..."}]. No markdown.` }] }], 
-                    tools: [{ "google_search": {} }] 
-                })
-            });
-            const data = await res.json();
-            let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-            rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-            
-            try {
-                const news = JSON.parse(rawText);
-                feed.innerHTML = news.map(n => `
-                    <a href="${n.url}" target="_blank" class="news-card">
-                        <span class="meta-category">${n.category || 'AI LAW'}</span>
-                        <div class="news-headline">${n.title}</div>
-                    </a>
-                `).join('');
-            } catch (err) { feed.innerHTML = "Feed paused."; }
-        } catch (e) { feed.innerHTML = "Offline."; }
-    }
-
-    document.getElementById('user-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleChat();
-    });
-
-    window.onload = () => fetchLiveNews();
+    document.getElementById('user-input').addEventListener('keypress', e => e.key === 'Enter' && handleChat());
 </script>
 </body>
 </html>
