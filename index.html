@@ -202,9 +202,9 @@
         appId: "1:743828032118:web:fea3e038104e1c84b86d57"
     };
 
-    // ✅ FIX 2: Gemini key + σωστό endpoint v1 (όχι v1beta) + σωστό model name
+    // ✅ FIX 2: v1beta + gemini-1.5-flash-latest (systemInstruction υποστηρίζεται μόνο σε v1beta)
     var GEMINI_API_KEY = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc";
-    var GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+    var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + GEMINI_API_KEY;
 
     var APP_ID = 'niovi_enterprise_v2';
 
@@ -426,15 +426,18 @@
             var memText = localIntel.map(function(i) { return i.text; }).join(". ");
             var newsText = marketNews.map(function(n) { return n.title; }).join(". ");
 
-            // ✅ FIX 3: Σωστό GEMINI_URL (v1 + gemini-1.5-flash) + systemInstruction σωστά δομημένο
+            // ✅ FIX 3: system prompt μέσα στο contents ως πρώτο μήνυμα — πιο συμβατό
+            var systemPrompt = "Είσαι η Niovi AI, στρατηγικός βοηθός επιχειρήσεων. Απάντα στα Ελληνικά. Απάντα μόνο σε ό,τι σε ρωτάνε." +
+                (memText ? " Δεδομένα μνήμης: " + memText + "." : "") +
+                (newsText ? " Τελευταία νέα: " + newsText + "." : "");
+
             var response = await fetch(GEMINI_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ role: "user", parts: [{ text: text }] }],
-                    systemInstruction: {
-                        parts: [{ text: "Είσαι η Niovi AI, στρατηγικός βοηθός. Απάντα στα Ελληνικά. Απάντα μόνο σε ό,τι σε ρωτάνε." + (memText ? " Δεδομένα μνήμης: " + memText : "") + (newsText ? " Τελευταία νέα: " + newsText : "") }]
-                    }
+                    contents: [
+                        { role: "user", parts: [{ text: systemPrompt + "\n\nΕρώτηση: " + text }] }
+                    ]
                 })
             });
 
