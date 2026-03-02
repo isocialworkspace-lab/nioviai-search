@@ -238,8 +238,8 @@
     const db = getFirestore(app);
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'niovi-workspace-v3';
     
-    // Ενσωματωμένο Gemini API Key για χρήση εκτός Canvas (π.χ. GitHub)
-    const apiKey = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc"; 
+    // Το κλειδί σου για το Gemini
+    const myApiKey = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc"; 
 
     let currentUser = null;
     let activeChatId = null;
@@ -249,18 +249,42 @@
     let chatUnsubscribe = null;
 
     // --- UTILS ---
-    async function apiFetchWithRetry(url, options, retries = 5, delay = 1000) {
-        if (!apiKey && typeof __app_id === 'undefined') {
-            throw new Error("Missing Gemini API Key. Please ensure the key is correctly set in the code.");
-        }
+    /**
+     * Ειδική συνάρτηση fetch που διαχειρίζεται το API key ανάλογα με το περιβάλλον.
+     * Αν το myApiKey προκαλεί σφάλμα (π.χ. στο Canvas), δοκιμάζει με κενό κλειδί.
+     */
+    async function apiFetchWithRetry(baseUrl, payload, retries = 3) {
+        // Χρησιμοποιούμε το κλειδί σου αν είμαστε εκτός Canvas, αλλιώς κενό για το Canvas bridge
+        const keyToUse = (typeof __app_id !== 'undefined') ? "" : myApiKey;
+        const url = `${baseUrl}?key=${keyToUse}`;
+
         for (let i = 0; i < retries; i++) {
             try {
-                const response = await fetch(url, options);
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
                 if (response.ok) return await response.json();
-                throw new Error("API call failed");
+                
+                // Αν το σφάλμα είναι 403/400 (συνήθως θέμα κλειδιού στο Canvas)
+                if (response.status >= 400 && response.status < 500 && i === 0) {
+                     // Δοκιμάζουμε μια φορά με το αντίθετο κλειδί (fallback)
+                     const fallbackKey = keyToUse === "" ? myApiKey : "";
+                     const fallbackUrl = `${baseUrl}?key=${fallbackKey}`;
+                     const fallbackRes = await fetch(fallbackUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                     });
+                     if (fallbackRes.ok) return await fallbackRes.json();
+                }
+
+                throw new Error(`API error: ${response.status}`);
             } catch (err) {
                 if (i === retries - 1) throw err;
-                await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
             }
         }
     }
@@ -456,14 +480,10 @@
         container.innerHTML = "<div class='loading-dots'>Αναζήτηση στη Google...</div>";
         try {
             const result = await apiFetchWithRetry(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`,
                 {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Find 3 extremely recent strategic business/AI news in Greece. Output ONLY a raw JSON array: [{'title': '...', 'url': '...'}]" }] }],
-                        tools: [{ "google_search": {} }]
-                    })
+                    contents: [{ parts: [{ text: "Find 3 extremely recent strategic business/AI news in Greece. Output ONLY a raw JSON array: [{'title': '...', 'url': '...'}]" }] }],
+                    tools: [{ "google_search": {} }]
                 }
             );
             let textRaw = result.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
@@ -477,7 +497,7 @@
             `).join('');
             renderNews();
         } catch (e) { 
-            container.innerHTML = `<div class="error-overlay">Σφάλμα φόρτωσης. Ελέγξτε τη σύνδεση ή το API Key.</div>`; 
+            container.innerHTML = `<div class="error-overlay">Σφάλμα φόρτωσης. Ελέγξτε τη σύνδεση.</div>`; 
         }
     };
 
@@ -509,22 +529,21 @@
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', currentId, 'logs'), { 
                 text, role: 'user', timestamp: new Date().toISOString() 
             });
+            
             const result = await apiFetchWithRetry(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`,
                 {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Είσαι η NioviAI, ένας στρατηγικός βοηθός. Χρησιμοποίησε την εξής μνήμη αν χρειάζεται: ${globalKnowledge}. Ερώτηση χρήστη: ${text}` }] }]
-                    })
+                    contents: [{ parts: [{ text: `Είσαι η NioviAI, ένας στρατηγικός βοηθός. Χρησιμοποίησε την εξής μνήμη αν χρειάζεται: ${globalKnowledge}. Ερώτηση χρήστη: ${text}` }] }]
                 }
             );
+            
             const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Σφάλμα απόκρισης.";
             appendMessage(reply, 'bot');
             await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', currentId, 'logs'), { 
                 text: reply, role: 'bot', timestamp: new Date().toISOString() 
             });
         } catch (e) { 
+            console.error(e);
             appendMessage(`Σφάλμα σύνδεσης. Προσπαθήστε ξανά.`, 'bot'); 
         }
     };
