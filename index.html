@@ -155,35 +155,65 @@ var FIREBASE_CONFIG = {
     messagingSenderId: "743828032118",
     appId: "1:743828032118:web:fea3e038104e1c84b86d57"
 };
-var GEMINI_API_KEY = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc";
-// Fallback: δοκιμάζει models διαδοχικά μέχρι να βρει ένα που δουλεύει
+// ===================== GEMINI FALLBACK SYSTEM =====================
+// Δοκιμάζει κάθε συνδυασμό key + model μέχρι να βρει αυτό που δουλεύει
+var GEMINI_KEYS = [
+    "AIzaSyC0n2qCh6bcuFGnZUkvmN_V01o6g1ocaFA",
+    "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc",
+    "AIzaSyBiwqO6mBx3ng0RY58MmBvO2vBA9TZ8jFA"
+];
 var GEMINI_MODELS = [
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent",
     "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-001:generateContent"
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-001:generateContent"
 ];
 
+var activeKey = null;
+var activeModel = null;
+
 async function geminiCall(payload) {
-    for (var i = 0; i < GEMINI_MODELS.length; i++) {
-        var url = GEMINI_MODELS[i] + "?key=" + GEMINI_API_KEY;
+    // Αν ήδη ξέρουμε ποιο key+model δουλεύει, χρησιμοποίησέ το
+    if (activeKey && activeModel) {
         try {
-            var response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+            var r = await fetch(activeModel + "?key=" + activeKey, {
+                method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
-            var data = await response.json();
-            if (response.ok) {
-                console.log("✅ Model OK:", GEMINI_MODELS[i]);
-                return data;
+            var d = await r.json();
+            if (r.ok) return d;
+        } catch(e) { activeKey = null; activeModel = null; } // reset αν σπάσει
+    }
+
+    // Ψάχνουμε το πρώτο που δουλεύει — keys x models παράλληλα ανά model
+    for (var m = 0; m < GEMINI_MODELS.length; m++) {
+        var promises = GEMINI_KEYS.map(function(key) {
+            return fetch(GEMINI_MODELS[m] + "?key=" + key, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(function(res) {
+                return res.json().then(function(data) {
+                    return { ok: res.ok, status: res.status, data: data, key: key, model: GEMINI_MODELS[m] };
+            });
+            }).catch(function(e) { return { ok: false, error: e.message }; });
+        });
+
+        var results = await Promise.all(promises);
+        for (var r = 0; r < results.length; r++) {
+            if (results[r].ok) {
+                activeKey = results[r].key;
+                activeModel = results[r].model;
+                console.log("✅ Ενεργό:", activeModel.split("/models/")[1], "| Key:", activeKey.slice(-6));
+                return results[r].data;
             }
-            console.warn("❌ Model failed (" + response.status + "):", GEMINI_MODELS[i]);
-        } catch(e) {
-            console.warn("❌ Model error:", GEMINI_MODELS[i], e.message);
+            console.warn("❌", (results[r].model||"?").split("/models/")[1], "key:"+results[r].key.slice(-6), results[r].status || results[r].error);
         }
     }
-    throw new Error("Κανένα διαθέσιμο Gemini model. Ελέγξτε το API key σας.");
+    throw new Error("Κανένας συνδυασμός key+model δεν λειτουργεί. Ελέγξτε τα API keys στο Google AI Studio.");
 }
 var APP_ID = 'niovi_enterprise_v2';
 
