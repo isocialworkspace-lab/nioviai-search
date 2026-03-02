@@ -15,244 +15,155 @@
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        body {
-            font-family: var(--font-family);
-            background-color: var(--bg-color);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            color: var(--text-main);
-        }
+        body { font-family: var(--font-family); background-color: var(--bg-color); margin: 0; display: flex; height: 100vh; color: var(--text-main); }
 
         /* --- Sidebar --- */
-        .sidebar {
-            width: 320px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 40px 24px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        .profile-container {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .profile-frame {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin: 0 auto 15px;
-            border: 2px solid var(--border);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
+        .sidebar { width: 340px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 30px 20px; box-sizing: border-box; overflow-y: auto; }
+        
+        .profile-frame { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; margin: 0 auto 15px; border: 2px solid var(--border); }
         .profile-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .persona-name { font-size: 18px; font-weight: 700; text-align: center; margin: 0; }
 
-        .persona-name { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
-        .persona-title { font-size: 13px; color: var(--text-secondary); margin-top: 5px; line-height: 1.4; }
+        /* --- Trends Radar Section --- */
+        .radar-section { margin-top: 25px; padding: 15px; background: #fdfdfd; border: 1px solid var(--border); border-radius: 15px; }
+        .radar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .radar-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); }
+        
+        .scan-btn { font-size: 10px; background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        #trends-container { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; }
+        .trend-tag { font-size: 11px; background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 12px; border: 1px solid #e0e7ff; animation: fadeIn 0.5s ease; }
 
-        /* --- Knowledge Base Section --- */
-        .knowledge-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .knowledge-section label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        #knowledge-input {
-            width: 100%;
-            height: 150px;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            font-size: 13px;
-            font-family: inherit;
-            resize: none;
-            background: #fdfdfd;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        #knowledge-input:focus { border-color: var(--text-main); outline: none; }
-
-        .status-tag {
-            margin-top: auto;
-            font-size: 11px;
-            background: #f0f0f2;
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            color: var(--text-secondary);
-        }
+        /* --- Knowledge Base --- */
+        .knowledge-section { margin-top: 20px; }
+        .knowledge-label { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; display: block; margin-bottom: 8px; }
+        #knowledge-input { width: 100%; height: 120px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; font-size: 12px; resize: none; box-sizing: border-box; font-family: inherit; }
 
         /* --- Main Chat --- */
         .main-chat { flex: 1; display: flex; flex-direction: column; position: relative; }
-
-        #chat-window {
-            flex: 1;
-            overflow-y: auto;
-            padding: 40px 10% 120px 10%;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 16px 22px;
-            font-size: 16px;
-            line-height: 1.6;
-            border-radius: 20px;
-        }
-
-        .user {
-            align-self: flex-end;
-            background-color: var(--accent);
-            color: #fff;
-            border-bottom-right-radius: 4px;
-        }
-
-        .bot {
-            align-self: flex-start;
-            background-color: #fff;
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
+        #chat-window { flex: 1; overflow-y: auto; padding: 40px 10% 120px 10%; display: flex; flex-direction: column; gap: 20px; }
+        
+        .message { max-width: 85%; padding: 14px 20px; font-size: 15px; line-height: 1.6; border-radius: 18px; }
+        .user { align-self: flex-end; background-color: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+        .bot { align-self: flex-start; background-color: #fff; border: 1px solid var(--border); border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
 
         /* --- Input Bar --- */
-        .input-container {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 30px 10%;
-            box-sizing: border-box;
-            background: linear-gradient(to top, var(--bg-color) 80%, transparent);
-        }
+        .input-container { position: absolute; bottom: 0; width: 100%; padding: 25px 10%; box-sizing: border-box; background: linear-gradient(to top, var(--bg-color) 70%, transparent); }
+        .input-wrapper { display: flex; gap: 10px; background: #fff; padding: 8px 8px 8px 20px; border-radius: 35px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; }
+        .send-btn { background: var(--accent); color: #fff; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; }
 
-        .input-wrapper {
-            display: flex;
-            gap: 12px;
-            background: #fff;
-            padding: 8px 8px 8px 20px;
-            border-radius: 35px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-
-        input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            background: transparent;
-        }
-
-        button {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        button:active { transform: scale(0.95); }
-        button:disabled { opacity: 0.5; }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="profile-container">
-        <div class="profile-frame">
-            <img src="profile.jpg" alt="Niovi" onerror="this.src='https://ui-avatars.com/api/?name=Niovi+Christopoulou&background=000&color=fff&size=120'">
+    <div class="profile-frame">
+        <img src="profile.jpg" alt="Niovi" onerror="this.src='https://ui-avatars.com/api/?name=Niovi+Christopoulou&background=000&color=fff&size=120'">
+    </div>
+    <h1 class="persona-name">Νιόβη Χριστοπούλου</h1>
+
+    <div class="radar-section">
+        <div class="radar-header">
+            <span class="radar-title">Trends Radar</span>
+            <button class="scan-btn" onclick="scanTrends()">Scan Web</button>
         </div>
-        <h1 class="persona-name">Νιόβη Χριστοπούλου</h1>
-        <p class="persona-title">Digital Marketing Copilot<br>NYC & Athens Strategy</p>
+        <div id="trends-container">
+            <span style="font-size:10px; color:#999;">Πατήστε Scan για επίκαιρα θέματα...</span>
+        </div>
     </div>
 
     <div class="knowledge-section">
-        <label>Knowledge Base (Training)</label>
-        <textarea id="knowledge-input" placeholder="Επικολλήστε εδώ νέα papers, άρθρα ή ομιλίες για να 'εκπαιδεύσετε' την AI για αυτή τη συνομιλία..."></textarea>
-    </div>
-
-    <div class="status-tag">
-        Engine: Gemini 1.5 Flash <br>
-        Status: Online & Grounded
+        <label class="knowledge-label">Knowledge Base (Training)</label>
+        <textarea id="knowledge-input" placeholder="Επικολλήστε εδώ νέα άρθρα, papers ή ομιλίες για να δώσετε έξτρα πλαίσιο στην AI..."></textarea>
     </div>
 </div>
 
 <div class="main-chat">
     <div id="chat-window">
         <div class="message bot">
-            **Niovi AI Ready.** <br><br>
-            Είμαι ο στρατηγικός σας συνεργάτης. Έχω ενσωματώσει το πλάνο της "Διεθνούς Ελληνίδας". <br><br>
-            Αν έχετε νέο υλικό (π.χ. ένα paper), επικολλήστε το αριστερά. Διαφορετικά, πείτε μου: **Τι θα δημιουργήσουμε σήμερα;**
+            **Niovi AI: Tactical Engine Active.** <br><br>
+            Είμαι έτοιμη. Έχω φορτώσει τη στρατηγική της "Διεθνούς Ελληνίδας". <br><br>
+            Μπορείτε να χρησιμοποιήσετε το **Trends Radar** για να δούμε τι συμβαίνει τώρα στο web ή να μου δώσετε νέο υλικό στο **Knowledge Base**. Τι σχεδιάζουμε σήμερα;
         </div>
     </div>
     
     <div class="input-container">
         <div class="input-wrapper">
-            <input type="text" id="user-input" placeholder="Γράψτε το μήνυμά σας εδώ...">
-            <button id="send-btn" onclick="handleSearch()">Ask Niovi</button>
+            <input type="text" id="user-input" placeholder="Περιγράψτε το επόμενο βήμα στρατηγικής...">
+            <button class="send-btn" onclick="handleSearch()">Ask Niovi</button>
         </div>
     </div>
 </div>
 
 <script>
+    // ΣΤΑΘΕΡΟ ΚΛΕΙΔΙ
     const API_KEY = "AIzaSyBDRcnQ3V5j21bwxTOrSXjPwcRtIre2fo0"; 
     
     const STRATEGY_CONTEXT = `
     ΕΙΣΑΙ: Η Niovi AI, Digital Marketing Expert Copilot.
-    ΠΡΟΣΩΠΙΚΟΤΗΤΑ: Νιόβη Χριστοπούλου (Columbia Law, Amazon, AI Fund). 
-    ΣΤΟΧΟΣ: Γέφυρα NYC-Athens, Expert Authority σε AI/Fintech, Brain Gain Vision.
-    
-    ΚΑΝΟΝΕΣ:
-    1. Χρησιμοποίησε ELI5 (Explain Like I'm Five) για δύσκολα θέματα.
-    2. Στα lifestyle θέματα, δείξε την "Silly Goose" πλευρά (Jack Schlossberg vibe).
-    3. Για κάθε βίντεο (TikTok/Reels), ξεκίνα ΠΑΝΤΑ με ένα Hook 3 δευτερολέπτων.
-    4. Μετάτρεψε τα επιστημονικά papers σε "Digestible Content".
+    ΠΡΟΣΩΠΙΚΟΤΗΤΑ: Νιόβη Χριστοπούλου (Columbia Law, Fintech, AI Expert). 
+    ΣΤΟΧΟΣ: Η ανάδειξη της "Διεθνούς Ελληνίδας" (NYC-Athens).
+    ΣΤΥΛ: Αυθεντικό, ELI5 για τεχνικά, Jack Schlossberg vibe για lifestyle.
+    ΟΔΗΓΙΕΣ: Για κάθε βίντεο πρότεινε Hook 3 δευτερολέπτων.
     `;
 
+    const trendsContainer = document.getElementById('trends-container');
     const chatWindow = document.getElementById('chat-window');
     const userInput = document.getElementById('user-input');
     const knowledgeInput = document.getElementById('knowledge-input');
-    const sendBtn = document.getElementById('send-btn');
 
+    // ΛΕΙΤΟΥΡΓΙΑ SCAN ΓΙΑ TRENDS
+    async function scanTrends() {
+        trendsContainer.innerHTML = '<span style="font-size:10px; color:#999;">Scanning Web...</span>';
+        
+        const scanPrompt = "Εντόπισε 5 επίκαιρες λέξεις-κλειδιά ή θέματα (social media trends) που αφορούν τη Νιόβη Χριστοπούλου, το AI Law, το Fintech και την ψηφιακή διπλωματία. Επίστρεψε ΜΟΝΟ τις λέξεις χωρισμένες με κόμμα.";
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: scanPrompt }] }]
+                })
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+
+            const keywords = data.candidates[0].content.parts[0].text.split(',');
+            
+            trendsContainer.innerHTML = '';
+            keywords.forEach(word => {
+                if(word.trim().length > 1) {
+                    const tag = document.createElement('span');
+                    tag.className = 'trend-tag';
+                    tag.innerText = word.trim();
+                    trendsContainer.appendChild(tag);
+                }
+            });
+        } catch (e) {
+            console.error(e);
+            trendsContainer.innerHTML = '<span style="font-size:10px; color:red;">Scan failed.</span>';
+        }
+    }
+
+    // ΛΕΙΤΟΥΡΓΙΑ CHAT
     async function handleSearch() {
         const query = userInput.value.trim();
         const extraKnowledge = knowledgeInput.value.trim();
         
         if (!query) return;
 
-        // Display user message
         chatWindow.innerHTML += `<div class="message user">${query}</div>`;
         userInput.value = "";
         userInput.disabled = true;
-        sendBtn.disabled = true;
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Build the prompt with extra knowledge
         let finalPrompt = STRATEGY_CONTEXT;
         if (extraKnowledge) {
-            finalPrompt += `\n\nΕΠΙΠΛΕΟΝ ΓΝΩΣΗ ΓΙΑ ΑΥΤΗ ΤΗ ΣΥΝΟΜΙΛΙΑ:\n${extraKnowledge}`;
+            finalPrompt += `\n\nΕΠΙΠΛΕΟΝ ΓΝΩΣΗ (KNOWLEDGE BASE):\n${extraKnowledge}`;
         }
         finalPrompt += `\n\nUser Question: ${query}`;
 
@@ -274,16 +185,13 @@
             chatWindow.innerHTML += `<div class="message bot" style="color:red">Σφάλμα: ${error.message}</div>`;
         } finally {
             userInput.disabled = false;
-            sendBtn.disabled = false;
             userInput.focus();
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
     }
 
     function formatReply(text) {
-        return text
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
+        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
     }
 
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
