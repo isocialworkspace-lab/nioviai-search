@@ -53,12 +53,15 @@
 
         .logo-text {
             color: white;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            text-shadow: 0 0 8px rgba(37, 99, 235, 0.8);
+            text-shadow: 0 0 10px rgba(37, 99, 235, 0.9);
             font-family: 'Monaco', 'Consolas', monospace;
+            background: linear-gradient(90deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .nav-item {
@@ -180,6 +183,9 @@
         .hub-input { width: 100%; height: 80px; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
         .loading-dots { font-size: 11px; color: var(--accent-blue); text-align: center; padding: 10px; }
         #knowledge-stats { font-size: 10px; text-align: center; margin-top: 8px; font-weight: 600; }
+        
+        /* Error Message Styling */
+        .error-overlay { color: #ef4444; font-size: 11px; text-align: center; padding: 10px; border: 1px solid #fee2e2; border-radius: 8px; background: #fff1f2; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -231,6 +237,9 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'niovi-workspace-v3';
+    
+    // ΣΗΜΑΝΤΙΚΟ: Το apiKey παραμένει κενό για το Canvas. 
+    // Αν το τρέχετε στο GitHub, πρέπει να ορίσετε ένα κλειδί εδώ ή το σύστημα να το τραβάει από αλλού.
     const apiKey = ""; 
 
     let currentUser = null;
@@ -242,6 +251,9 @@
 
     // --- UTILS ---
     async function apiFetchWithRetry(url, options, retries = 5, delay = 1000) {
+        if (!apiKey && typeof __app_id === 'undefined') {
+            throw new Error("Missing API Key. Please configure it for external domains.");
+        }
         for (let i = 0; i < retries; i++) {
             try {
                 const response = await fetch(url, options);
@@ -374,29 +386,17 @@
     };
 
     window.deleteChat = async function(e, id) {
-        if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        if (!confirm("Are you sure you want to delete this chat?")) return;
-        
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (!confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη συνομιλία;")) return;
         try {
-            // UI Feedback
             const row = document.getElementById(`chat-row-${id}`);
             if (row) row.style.opacity = '0.3';
-
-            // Firestore Delete
             const chatRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_sessions', id);
             await deleteDoc(chatRef);
-
-            if (activeChatId === id) {
-                startNewChat();
-            }
+            if (activeChatId === id) startNewChat();
         } catch (err) {
             console.error("Delete failed:", err);
-            alert("Delete failed. Please try again.");
-            if (row) row.style.opacity = '1';
+            alert("Η διαγραφή απέτυχε.");
         }
     };
 
@@ -418,7 +418,7 @@
     function refreshDrawerContent() {
         const title = document.getElementById('drawer-title');
         if (currentDrawerType === 'chats') {
-            title.innerText = "Chat History";
+            title.innerText = "Ιστορικό Συνομιλιών";
             loadChatList();
         } else if (currentDrawerType === 'intel') {
             title.innerText = "Intelligence Hub";
@@ -437,7 +437,7 @@
             <div id="intel-feed-container"></div>
             <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
             <div style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:10px;">INTELLIGENCE MEMORY TRAIN</div>
-            <textarea id="hub-input" class="hub-input" placeholder="Feed me information :)"></textarea>
+            <textarea id="hub-input" class="hub-input" placeholder="Εισάγετε στρατηγικές πληροφορίες..."></textarea>
             <button id="save-k-btn" onclick="saveKnowledge()" style="width:100%; padding:10px; background:var(--accent-blue); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Learn</button>
             <div id="knowledge-stats" style="color:var(--text-secondary); margin-top:10px; text-align:center; font-size:10px;"></div>
         `;
@@ -448,13 +448,13 @@
     function renderNews() {
         const container = document.getElementById('intel-feed-container');
         if (!container) return;
-        container.innerHTML = newsCache || "<div style='font-size:12px; color:gray; text-align:center; padding:10px;'>Click Search for updates.</div>";
+        container.innerHTML = newsCache || "<div style='font-size:12px; color:gray; text-align:center; padding:10px;'>Πατήστε Search για ενημερώσεις.</div>";
     }
 
     window.fetchNews = async function() {
         const container = document.getElementById('intel-feed-container');
         if (!container) return;
-        container.innerHTML = "<div class='loading-dots'>Searching Google...</div>";
+        container.innerHTML = "<div class='loading-dots'>Αναζήτηση στη Google...</div>";
         try {
             const result = await apiFetchWithRetry(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
@@ -478,7 +478,7 @@
             `).join('');
             renderNews();
         } catch (e) { 
-            container.innerHTML = "<div style='font-size:11px; color:red; text-align:center;'>Error loading feed.</div>"; 
+            container.innerHTML = `<div class="error-overlay">Σφάλμα φόρτωσης. ${!apiKey ? 'Λείπει το API Key.' : ''}</div>`; 
         }
     };
 
@@ -526,7 +526,7 @@
                 text: reply, role: 'bot', timestamp: new Date().toISOString() 
             });
         } catch (e) { 
-            appendMessage("Σφάλμα σύνδεσης με τη βάση δεδομένων ή το AI.", 'bot'); 
+            appendMessage(`Σφάλμα σύνδεσης. ${!apiKey ? 'Λείπει το API Key για εξωτερική χρήση.' : 'Προσπαθήστε ξανά.'}`, 'bot'); 
         }
     };
 
