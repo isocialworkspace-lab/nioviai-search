@@ -155,9 +155,36 @@ var FIREBASE_CONFIG = {
     messagingSenderId: "743828032118",
     appId: "1:743828032118:web:fea3e038104e1c84b86d57"
 };
-var GEMINI_API_KEY = "AIzaSyBiwqO6mBx3ng0RY58MmBvO2vBA9TZ8jFA";
-// Χρησιμοποιούμε το v1beta endpoint με gemini-pro που είναι σίγουρα διαθέσιμο
-var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY;
+var GEMINI_API_KEY = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc";
+// Fallback: δοκιμάζει models διαδοχικά μέχρι να βρει ένα που δουλεύει
+var GEMINI_MODELS = [
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent",
+    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-001:generateContent"
+];
+
+async function geminiCall(payload) {
+    for (var i = 0; i < GEMINI_MODELS.length; i++) {
+        var url = GEMINI_MODELS[i] + "?key=" + GEMINI_API_KEY;
+        try {
+            var response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            var data = await response.json();
+            if (response.ok) {
+                console.log("✅ Model OK:", GEMINI_MODELS[i]);
+                return data;
+            }
+            console.warn("❌ Model failed (" + response.status + "):", GEMINI_MODELS[i]);
+        } catch(e) {
+            console.warn("❌ Model error:", GEMINI_MODELS[i], e.message);
+        }
+    }
+    throw new Error("Κανένα διαθέσιμο Gemini model. Ελέγξτε το API key σας.");
+}
 var APP_ID = 'niovi_enterprise_v2';
 
 // ===================== SYSTEM PROMPT (Εκπαίδευση) =====================
@@ -361,15 +388,7 @@ async function fetchNews() {
     var newsPrompt = 'Search for 4 very recent real news articles (last 7 days) about these specific topics: AI Act EU regulations, Fintech Greece, digital sovereignty geopolitics, logistics shipping technology, Greek diaspora brain gain, AI technology law. For each article find the real URL. Return ONLY a raw JSON array with NO markdown, NO backticks, NO explanation: [{"title":"...","url":"https://...","source":"...","topic":"AI/Fintech/Geopolitics/Logistics"}]';
 
     try {
-        var response = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: newsPrompt }] }]
-            })
-        });
-        var data = await response.json();
-        if (!response.ok) throw new Error((data.error && data.error.message) || 'API ' + response.status);
+        var data = await geminiCall({ contents: [{ parts: [{ text: newsPrompt }] }] });
 
         var raw = (data.candidates && data.candidates[0].content.parts[0].text) || '[]';
         raw = raw.replace(/```json/g,'').replace(/```/g,'').trim();
@@ -463,20 +482,7 @@ async function handleSend() {
             (memText ? '\n\nΕΠΙΠΛΕΟΝ ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ:\n' + memText : '') +
             '\n\nΕΡΩΤΗΣΗ ΧΡΗΣΤΗ: ' + text;
 
-        var response = await fetch(GEMINI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: fullPrompt }] }]
-            })
-        });
-
-        var data = await response.json();
-
-        if (!response.ok) {
-            var errMsg = (data.error && data.error.message) ? data.error.message : 'HTTP ' + response.status;
-            throw new Error(errMsg);
-        }
+        var data = await geminiCall({ contents: [{ parts: [{ text: fullPrompt }] }] });
 
         var reply = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text)
             || 'Δεν έλαβα απάντηση.';
@@ -518,4 +524,3 @@ document.getElementById('user-input').addEventListener('keypress', function(e){
 </script>
 </body>
 </html>
-
