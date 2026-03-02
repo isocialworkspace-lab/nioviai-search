@@ -47,17 +47,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
             margin-bottom: 10px;
+        }
+
+        .logo-img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            border-radius: 8px;
         }
 
         .logo-text {
             color: white;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 0 10px rgba(37, 99, 235, 0.9);
             font-family: 'Monaco', 'Consolas', monospace;
             background: linear-gradient(90deg, #fff, #94a3b8);
             -webkit-background-clip: text;
@@ -133,39 +139,6 @@
             gap: 8px;
         }
 
-        /* Chat List Items */
-        .chat-history-item {
-            position: relative;
-            padding: 12px; 
-            background: white; 
-            border: 1px solid var(--border);
-            border-radius: 10px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .chat-history-item:hover { border-color: var(--accent-blue); background: #f1f5f9; }
-        .chat-history-item.active { border-color: var(--accent-blue); background: #eff6ff; }
-        
-        .chat-info { flex: 1; min-width: 0; }
-        .chat-history-title { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .chat-history-date { font-size: 10px; color: var(--text-secondary); }
-        
-        .delete-chat-btn {
-            padding: 8px;
-            color: var(--text-secondary);
-            border-radius: 6px;
-            transition: all 0.2s;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            z-index: 10;
-        }
-        .delete-chat-btn:hover { color: var(--accent-red); background: #fee2e2; }
-
         /* Chat Window */
         .main-chat { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
         #chat-window { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 20px; }
@@ -177,22 +150,38 @@
         .input-box { display: flex; gap: 10px; background: #f8fafc; padding: 10px 15px; border-radius: 30px; border: 1px solid var(--border); }
         .input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; }
 
-        /* News & Hub */
-        .news-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
-        .news-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .chat-history-item {
+            padding: 12px; 
+            background: white; 
+            border: 1px solid var(--border);
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-history-item.active { border-color: var(--accent-blue); background: #eff6ff; }
+        
+        .delete-chat-btn {
+            padding: 5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
         .hub-input { width: 100%; height: 80px; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 12px; margin-bottom: 10px; resize: none; box-sizing: border-box; }
         .loading-dots { font-size: 11px; color: var(--accent-blue); text-align: center; padding: 10px; }
-        #knowledge-stats { font-size: 10px; text-align: center; margin-top: 8px; font-weight: 600; }
-        
-        /* Error Message Styling */
-        .error-overlay { color: #ef4444; font-size: 11px; text-align: center; padding: 10px; border: 1px solid #fee2e2; border-radius: 8px; background: #fff1f2; margin: 10px 0; }
+        .error-overlay { color: #ef4444; font-size: 12px; text-align: center; padding: 10px; border: 1px solid #fee2e2; border-radius: 8px; background: #fff1f2; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <nav class="global-nav">
     <div class="logo-container">
-        <img src="https://ui-avatars.com/api/?name=N&background=2563eb&color=fff" style="width: 38px; border-radius: 10px;" alt="Logo">
+        <!-- Χρήση του logo.png από το GitHub -->
+        <img src="logo.png" class="logo-img" onerror="this.src='https://ui-avatars.com/api/?name=N&background=2563eb&color=fff'" alt="Niovi Logo">
         <span class="logo-text">NioviAI</span>
     </div>
     
@@ -203,14 +192,14 @@
     
     <button class="nav-item" id="nav-intel" onclick="toggleDrawer('intel')">
         <div class="nav-icon">⚡</div>
-        <div class="nav-label">Intelligence</div>
+        <div class="nav-label">Intel</div>
     </button>
 </nav>
 
 <aside class="sidebar-drawer" id="sidebar-drawer">
     <div class="drawer-header">
         <div style="display:flex; justify-content: space-between; align-items: center;">
-            <h2 id="drawer-title" style="margin:0; font-size: 15px; font-weight: 800; text-transform: uppercase;">Chat History</h2>
+            <h2 id="drawer-title" style="margin:0; font-size: 15px; font-weight: 800; text-transform: uppercase;">Μενού</h2>
             <button onclick="closeDrawer()" style="border:none; background:none; cursor:pointer; font-size:18px;">✕</button>
         </div>
     </div>
@@ -230,7 +219,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, query, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = JSON.parse('{"apiKey":"AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE","authDomain":"niovi-ai.firebaseapp.com","projectId":"niovi-ai","storageBucket":"niovi-ai.firebasestorage.app","messagingSenderId":"743828032118","appId":"1:743828032118:web:fea3e038104e1c84b86d57"}');
     const app = initializeApp(firebaseConfig);
@@ -238,25 +227,23 @@
     const db = getFirestore(app);
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'niovi-workspace-v3';
     
-    // Το κλειδί σου για το Gemini
+    // Αλλαγή μοντέλου στο gemini-2.0-flash για μεγαλύτερη συμβατότητα
+    const MODEL_NAME = "gemini-2.0-flash";
     const myApiKey = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc"; 
 
     let currentUser = null;
     let activeChatId = null;
     let globalKnowledge = "";
     let currentDrawerType = null;
-    let newsCache = null;
     let chatUnsubscribe = null;
 
-    // --- UTILS ---
     /**
-     * Ειδική συνάρτηση fetch που διαχειρίζεται το API key ανάλογα με το περιβάλλον.
-     * Αν το myApiKey προκαλεί σφάλμα (π.χ. στο Canvas), δοκιμάζει με κενό κλειδί.
+     * Βελτιωμένη συνάρτηση fetch με σωστά endpoints για Gemini
      */
-    async function apiFetchWithRetry(baseUrl, payload, retries = 3) {
-        // Χρησιμοποιούμε το κλειδί σου αν είμαστε εκτός Canvas, αλλιώς κενό για το Canvas bridge
-        const keyToUse = (typeof __app_id !== 'undefined') ? "" : myApiKey;
-        const url = `${baseUrl}?key=${keyToUse}`;
+    async function apiFetchWithRetry(endpoint, payload, retries = 3) {
+        // Χρήση του API key αν δεν είμαστε σε περιβάλλον Canvas
+        const key = (typeof __app_id !== 'undefined' && __app_id) ? "" : myApiKey;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:${endpoint}?key=${key}`;
 
         for (let i = 0; i < retries; i++) {
             try {
@@ -268,296 +255,142 @@
                 
                 if (response.ok) return await response.json();
                 
-                // Αν το σφάλμα είναι 403/400 (συνήθως θέμα κλειδιού στο Canvas)
-                if (response.status >= 400 && response.status < 500 && i === 0) {
-                     // Δοκιμάζουμε μια φορά με το αντίθετο κλειδί (fallback)
-                     const fallbackKey = keyToUse === "" ? myApiKey : "";
-                     const fallbackUrl = `${baseUrl}?key=${fallbackKey}`;
-                     const fallbackRes = await fetch(fallbackUrl, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                     });
-                     if (fallbackRes.ok) return await fallbackRes.json();
-                }
-
-                throw new Error(`API error: ${response.status}`);
+                // Αν επιστρέψει 404/403, ίσως το κλειδί ή το μοντέλο έχει θέμα στο συγκεκριμένο περιβάλλον
+                const errorData = await response.json().catch(() => ({}));
+                console.error(`Attempt ${i+1} failed:`, response.status, errorData);
+                
+                if (i === retries - 1) throw new Error(`API Error ${response.status}`);
             } catch (err) {
                 if (i === retries - 1) throw err;
-                await new Promise(res => setTimeout(res, 1000 * Math.pow(2, i)));
+                await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)));
             }
         }
     }
 
-    // --- AUTHENTICATION ---
+    // AUTH
     const initAuth = async () => {
         try {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && __initial_auth_token.length > 10) {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
             } else {
                 await signInAnonymously(auth);
             }
-        } catch (err) {
+        } catch (e) {
             await signInAnonymously(auth);
         }
     };
 
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
-        if (user) {
+        if (user && !activeChatId) {
+            startNewChat();
             syncKnowledgeHub();
-            if (!activeChatId) {
-                startNewChat();
-            }
         }
     });
 
     initAuth();
 
-    // --- FIRESTORE LOGIC ---
     function syncKnowledgeHub() {
         if (!currentUser) return;
-        const knowledgeRef = collection(db, 'artifacts', appId, 'public', 'data', 'knowledge');
-        onSnapshot(knowledgeRef, (snap) => {
-            let combinedText = "";
-            snap.forEach(d => {
-                combinedText += (d.data().text || "") + " ";
-            });
-            globalKnowledge = combinedText.trim();
-            const stats = document.getElementById('knowledge-stats');
-            if (stats) {
-                stats.innerHTML = snap.size === 0 
-                    ? "<span style='color:orange;'>Κενή Μνήμη</span>"
-                    : `<span style='color:green;'>${snap.size} Στοιχεία στη Μνήμη ✓</span>`;
-            }
-        }, (err) => {
-            console.error("Sync Error:", err);
+        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'knowledge'), (snap) => {
+            let text = "";
+            snap.forEach(d => text += (d.data().text || "") + " ");
+            globalKnowledge = text.trim();
         });
     }
 
     window.startNewChat = async function() {
-        if (!currentUser) return;
         activeChatId = "chat_" + Date.now();
         document.getElementById('chat-window').innerHTML = "";
         try {
             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_sessions', activeChatId), {
                 title: "Νέα Συνομιλία",
                 timestamp: new Date().toISOString(),
-                uid: currentUser.uid
+                uid: currentUser?.uid || "anon"
             });
             appendMessage("Γεια σας! Είμαι η NioviAI. Πώς μπορώ να βοηθήσω στη στρατηγική σας;", 'bot');
-            if (currentDrawerType === 'chats') loadChatList();
-        } catch (e) {
-            console.error("Error starting chat:", e);
-        }
-    };
-
-    function loadChatList() {
-        const content = document.getElementById('drawer-content');
-        if (!content) return;
-        content.innerHTML = `<button class="new-chat-btn" onclick="startNewChat()">+ Νέα Συνομιλία</button><div id="list-container"></div>`;
-        
-        if (chatUnsubscribe) chatUnsubscribe();
-
-        const q = collection(db, 'artifacts', appId, 'public', 'data', 'chat_sessions');
-        chatUnsubscribe = onSnapshot(q, (snap) => {
-            const container = document.getElementById('list-container');
-            if (!container) return;
-            
-            const sessions = [];
-            snap.forEach(d => {
-                if (d.exists()) sessions.push({ id: d.id, ...d.data() });
-            });
-            sessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            container.innerHTML = "";
-            sessions.forEach(data => {
-                const item = document.createElement('div');
-                item.id = `chat-row-${data.id}`;
-                item.className = `chat-history-item ${data.id === activeChatId ? 'active' : ''}`;
-                item.innerHTML = `
-                    <div class="chat-info" onclick="switchChat('${data.id}')">
-                        <div class="chat-history-title">${data.title || "Chat"}</div>
-                        <div class="chat-history-date">${data.timestamp ? new Date(data.timestamp).toLocaleDateString('el-GR') : ''}</div>
-                    </div>
-                    <button class="delete-chat-btn" title="Delete" onclick="deleteChat(event, '${data.id}')">🗑️</button>
-                `;
-                container.appendChild(item);
-            });
-        }, (err) => console.error("List Error:", err));
-    }
-
-    window.switchChat = async function(id) {
-        activeChatId = id;
-        const win = document.getElementById('chat-window');
-        win.innerHTML = "<div class='loading-dots'>Φόρτωση...</div>";
-        
-        const q = collection(db, 'artifacts', appId, 'public', 'data', 'messages', id, 'logs');
-        const snap = await getDocs(q);
-        
-        const msgs = [];
-        snap.forEach(m => msgs.push(m.data()));
-        msgs.sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
-        
-        win.innerHTML = "";
-        if (msgs.length === 0) {
-             appendMessage("Γεια σας! Είμαι η NioviAI. Πώς μπορώ να βοηθήσω στη στρατηγική σας;", 'bot');
-        } else {
-             msgs.forEach(m => appendMessage(m.text, m.role, false));
-        }
-        refreshDrawerContent();
-    };
-
-    window.deleteChat = async function(e, id) {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
-        if (!confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη συνομιλία;")) return;
-        try {
-            const row = document.getElementById(`chat-row-${id}`);
-            if (row) row.style.opacity = '0.3';
-            const chatRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_sessions', id);
-            await deleteDoc(chatRef);
-            if (activeChatId === id) startNewChat();
-        } catch (err) {
-            console.error("Delete failed:", err);
-            alert("Η διαγραφή απέτυχε.");
-        }
-    };
-
-    window.toggleDrawer = function(type) {
-        if (currentDrawerType === type) { closeDrawer(); return; }
-        currentDrawerType = type;
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('nav-' + type)?.classList.add('active');
-        document.getElementById('sidebar-drawer').classList.add('open');
-        refreshDrawerContent();
-    };
-
-    window.closeDrawer = function() {
-        document.getElementById('sidebar-drawer').classList.remove('open');
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        currentDrawerType = null;
-    };
-
-    function refreshDrawerContent() {
-        const title = document.getElementById('drawer-title');
-        if (currentDrawerType === 'chats') {
-            title.innerText = "Ιστορικό Συνομιλιών";
-            loadChatList();
-        } else if (currentDrawerType === 'intel') {
-            title.innerText = "Intelligence Hub";
-            loadIntelHub();
-        }
-    }
-
-    function loadIntelHub() {
-        const content = document.getElementById('drawer-content');
-        if (!content) return;
-        content.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-size:11px; font-weight:800; color:var(--text-secondary);">INTELLIGENCE FEED</span>
-                <button class="refresh-btn" onclick="fetchNews()" style="font-size:10px; cursor:pointer; background:none; border:1px solid var(--border); padding:2px 6px; border-radius:4px;">Search</button>
-            </div>
-            <div id="intel-feed-container"></div>
-            <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
-            <div style="font-size:11px; font-weight:800; color:var(--text-secondary); margin-bottom:10px;">INTELLIGENCE MEMORY TRAIN</div>
-            <textarea id="hub-input" class="hub-input" placeholder="Εισάγετε στρατηγικές πληροφορίες..."></textarea>
-            <button id="save-k-btn" onclick="saveKnowledge()" style="width:100%; padding:10px; background:var(--accent-blue); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Learn</button>
-            <div id="knowledge-stats" style="color:var(--text-secondary); margin-top:10px; text-align:center; font-size:10px;"></div>
-        `;
-        renderNews();
-        syncKnowledgeHub(); 
-    }
-
-    function renderNews() {
-        const container = document.getElementById('intel-feed-container');
-        if (!container) return;
-        container.innerHTML = newsCache || "<div style='font-size:12px; color:gray; text-align:center; padding:10px;'>Πατήστε Search για ενημερώσεις.</div>";
-    }
-
-    window.fetchNews = async function() {
-        const container = document.getElementById('intel-feed-container');
-        if (!container) return;
-        container.innerHTML = "<div class='loading-dots'>Αναζήτηση στη Google...</div>";
-        try {
-            const result = await apiFetchWithRetry(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`,
-                {
-                    contents: [{ parts: [{ text: "Find 3 extremely recent strategic business/AI news in Greece. Output ONLY a raw JSON array: [{'title': '...', 'url': '...'}]" }] }],
-                    tools: [{ "google_search": {} }]
-                }
-            );
-            let textRaw = result.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-            textRaw = textRaw.replace(/```json/g, "").replace(/```/g, "").trim();
-            const news = JSON.parse(textRaw);
-            newsCache = news.map(n => `
-                <a href="${n.url}" target="_blank" class="news-card">
-                    <div style="font-size:12px; font-weight:700; color:var(--accent-blue);">${n.title}</div>
-                    <div style="font-size:9px; color:gray; margin-top:4px;">${new URL(n.url).hostname}</div>
-                </a>
-            `).join('');
-            renderNews();
-        } catch (e) { 
-            container.innerHTML = `<div class="error-overlay">Σφάλμα φόρτωσης. Ελέγξτε τη σύνδεση.</div>`; 
-        }
-    };
-
-    window.saveKnowledge = async function() {
-        const val = document.getElementById('hub-input').value.trim();
-        if (!val || !currentUser) return;
-        const btn = document.getElementById('save-k-btn');
-        btn.disabled = true;
-        btn.innerText = "Learning...";
-        try {
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'knowledge'), {
-                text: val, timestamp: new Date().toISOString(), uid: currentUser.uid
-            });
-            document.getElementById('hub-input').value = "";
-            btn.innerText = "Learned!";
-        } catch (e) { btn.innerText = "Error!"; }
-        setTimeout(() => { btn.disabled = false; btn.innerText = "Learn"; }, 1500);
+        } catch (e) { console.error(e); }
     };
 
     window.handleChat = async function() {
         const input = document.getElementById('user-input');
         const text = input.value.trim();
-        if (!text || !activeChatId || !currentUser) return;
+        if (!text || !activeChatId) return;
         
         appendMessage(text, 'user');
         input.value = "";
-        const currentId = activeChatId;
+
         try {
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', currentId, 'logs'), { 
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', activeChatId, 'logs'), { 
                 text, role: 'user', timestamp: new Date().toISOString() 
             });
             
-            const result = await apiFetchWithRetry(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`,
-                {
-                    contents: [{ parts: [{ text: `Είσαι η NioviAI, ένας στρατηγικός βοηθός. Χρησιμοποίησε την εξής μνήμη αν χρειάζεται: ${globalKnowledge}. Ερώτηση χρήστη: ${text}` }] }]
-                }
-            );
+            const result = await apiFetchWithRetry("generateContent", {
+                contents: [{ parts: [{ text: `Είσαι η NioviAI, ένας στρατηγικός βοηθός. Πλαίσιο γνώσης: ${globalKnowledge}. Ερώτηση: ${text}` }] }]
+            });
             
-            const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Σφάλμα απόκρισης.";
+            const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Δεν μπόρεσα να επεξεργαστώ την απάντηση.";
             appendMessage(reply, 'bot');
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', currentId, 'logs'), { 
+            
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages', activeChatId, 'logs'), { 
                 text: reply, role: 'bot', timestamp: new Date().toISOString() 
             });
         } catch (e) { 
             console.error(e);
-            appendMessage(`Σφάλμα σύνδεσης. Προσπαθήστε ξανά.`, 'bot'); 
+            appendMessage("Σφάλμα σύνδεσης με το AI. Παρακαλώ βεβαιωθείτε ότι το API Key είναι έγκυρο στο GitHub Secrets ή δοκιμάστε ξανά.", 'bot'); 
         }
     };
 
-    function appendMessage(text, role, scroll = true) {
+    function appendMessage(text, role) {
         const win = document.getElementById('chat-window');
-        if (!win) return;
         const div = document.createElement('div');
         div.className = `message ${role}`;
-        div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+        div.innerHTML = text.replace(/\n/g, '<br>');
         win.appendChild(div);
-        if (scroll) win.scrollTop = win.scrollHeight;
+        win.scrollTop = win.scrollHeight;
     }
 
+    window.toggleDrawer = function(type) {
+        currentDrawerType = type;
+        document.getElementById('sidebar-drawer').classList.add('open');
+        const content = document.getElementById('drawer-content');
+        if (type === 'chats') {
+            content.innerHTML = `<button class="new-chat-btn" onclick="startNewChat()">+ Νέα Συνομιλία</button><div id="chat-list"></div>`;
+            loadChatList();
+        } else {
+            content.innerHTML = `
+                <div style="font-size:11px; font-weight:800; color:gray; margin-bottom:10px;">STRATEGIC MEMORY</div>
+                <textarea id="hub-input" class="hub-input" placeholder="Προσθήκη στρατηγικής γνώσης..."></textarea>
+                <button onclick="saveKnowledge()" style="width:100%; padding:10px; background:var(--accent-blue); color:white; border:none; border-radius:8px; cursor:pointer;">Update Memory</button>
+            `;
+        }
+    };
+
+    function loadChatList() {
+        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'chat_sessions'), (snap) => {
+            const list = document.getElementById('chat-list');
+            if (!list) return;
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                const item = document.createElement('div');
+                item.className = `chat-history-item ${d.id === activeChatId ? 'active' : ''}`;
+                item.innerHTML = `<span>${data.title}</span><button onclick="deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'chat_sessions', '${d.id}'))">🗑️</button>`;
+                item.onclick = () => { activeChatId = d.id; document.getElementById('chat-window').innerHTML = ""; };
+                list.appendChild(item);
+            });
+        });
+    }
+
+    window.saveKnowledge = async function() {
+        const val = document.getElementById('hub-input').value.trim();
+        if (!val) return;
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'knowledge'), { text: val, timestamp: new Date().toISOString() });
+        document.getElementById('hub-input').value = "";
+        alert("Η γνώση προστέθηκε!");
+    };
+
+    window.closeDrawer = () => document.getElementById('sidebar-drawer').classList.remove('open');
     document.getElementById('user-input').addEventListener('keypress', e => e.key === 'Enter' && handleChat());
 </script>
 </body>
