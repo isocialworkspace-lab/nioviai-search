@@ -11,11 +11,10 @@
             --text-main: #0f172a;
             --text-secondary: #64748b;
             --accent-blue: #2563eb;
-            --accent-red: #ef4444; 
             --accent-dark: #1e3a8a;
             --border: #e2e8f0;
             --white: #ffffff;
-            --glass: rgba(255, 255, 255, 0.8);
+            --success-green: #22c55e;
         }
 
         body { 
@@ -28,136 +27,125 @@
             overflow: hidden;
         }
 
-        /* Sidebar Styling */
+        /* Sidebar Layout Fix */
         .sidebar { 
-            width: 420px; 
+            width: 400px; 
+            min-width: 400px;
             background-color: var(--bg-sidebar); 
             border-right: 1px solid var(--border); 
             display: flex; 
             flex-direction: column; 
-            padding: 24px; 
+            height: 100vh;
             box-sizing: border-box; 
-            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 24px 24px 10px 24px;
+            flex-shrink: 0;
         }
         
-        .profile-section { text-align: center; margin-bottom: 25px; }
+        .profile-section { text-align: center; margin-bottom: 15px; }
         .profile-frame { 
-            width: 65px; height: 65px; border-radius: 18px; overflow: hidden; 
-            margin: 0 auto 12px; border: 2.5px solid var(--accent-blue);
-            padding: 2px; background: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            width: 60px; height: 60px; border-radius: 16px; overflow: hidden; 
+            margin: 0 auto 10px; border: 2px solid var(--accent-blue);
+            padding: 2px; background: white; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
         }
-        .profile-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+        .profile-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
         .persona-name { font-size: 18px; font-weight: 800; color: var(--accent-dark); margin: 0; letter-spacing: -0.5px; }
-        .persona-title { font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+        .persona-title { font-size: 10px; color: var(--text-secondary); margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
 
-        /* Widget Headers */
+        /* Scrollable Feed Area */
+        .sidebar-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 24px;
+            margin-bottom: 10px;
+        }
+
         .widget-header { 
             display: flex; justify-content: space-between; align-items: center;
-            margin: 30px 0 15px 0; 
+            margin: 20px 0 12px 0; 
+            position: sticky;
+            top: 0;
+            background: var(--bg-sidebar);
+            z-index: 10;
+            padding: 5px 0;
         }
         .widget-title { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .refresh-btn { font-size: 10px; cursor: pointer; color: var(--accent-blue); font-weight: 800; text-decoration: none; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 6px; background: #eff6ff; }
+        .refresh-btn { font-size: 10px; cursor: pointer; color: var(--accent-blue); font-weight: 800; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 6px; background: #eff6ff; }
 
-        /* Search Container */
-        .search-container {
-            background: white; border: 1px solid var(--border); border-radius: 14px;
-            padding: 10px 14px; margin-bottom: 20px; display: flex; gap: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-        .search-container input { border: none; font-size: 13px; flex: 1; outline: none; background: transparent; font-weight: 500; }
-        .search-btn {
-            background: var(--accent-blue); color: white; border: none;
-            width: 32px; height: 32px; border-radius: 10px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        /* Intelligence Feed Items - Based on Screenshots */
         .news-card {
-            background: white; border: 1px solid var(--border); border-radius: 16px;
-            padding: 16px; margin-bottom: 12px; transition: all 0.3s ease;
+            background: white; border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px; margin-bottom: 10px; transition: all 0.2s ease;
             text-decoration: none; color: inherit; display: block;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
-        .news-card:hover { transform: translateY(-2px); border-color: var(--accent-blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        
-        .news-meta { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
-        .meta-category { font-size: 10px; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; }
-        .meta-date { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
-        .meta-source { font-size: 10px; font-weight: 800; color: var(--accent-red); text-transform: uppercase; }
+        .news-card:hover { transform: translateY(-1px); border-color: var(--accent-blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .meta-category { font-size: 9px; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; background: #eff6ff; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; display: inline-block; }
+        .news-headline { font-size: 12.5px; font-weight: 700; line-height: 1.4; color: var(--text-main); }
 
-        .news-headline { font-size: 14px; font-weight: 700; line-height: 1.5; color: var(--text-main); margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        /* Fixed Knowledge Hub Area */
+        .sidebar-footer {
+            padding: 20px 24px 24px 24px;
+            background: white;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
 
-        /* Strategic Hub Controls */
-        .hub-panel { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
-        .hub-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; height: 100px; font-size: 12px; padding: 12px; resize: none; box-sizing: border-box; font-family: inherit; margin-bottom: 10px; }
-        .hub-btn { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .hub-btn:hover { background: var(--accent-dark); }
-        .hub-status { font-size: 10px; margin-top: 10px; text-align: center; color: var(--text-secondary); font-weight: 600; }
+        .hub-panel { border-radius: 12px; }
+        .hub-input { width: 100%; border: 1px solid var(--border); border-radius: 10px; height: 70px; font-size: 12px; padding: 10px; resize: none; box-sizing: border-box; font-family: inherit; margin-bottom: 10px; background: #f8fafc; }
+        .hub-btn { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+        .hub-btn:hover { opacity: 0.9; }
+        .hub-btn:disabled { background: #cbd5e1; }
+        .hub-status { font-size: 10px; margin-top: 8px; text-align: center; color: var(--text-secondary); font-weight: 600; }
+        #cloud-status.active { color: var(--success-green); }
 
-        /* Chat Window */
+        /* Main Chat Area */
         .main-chat { flex: 1; display: flex; flex-direction: column; background: var(--white); }
-        #chat-window { flex: 1; overflow-y: auto; padding: 50px 15%; display: flex; flex-direction: column; gap: 28px; }
-        
-        .message { max-width: 80%; padding: 18px 24px; font-size: 15px; line-height: 1.7; border-radius: 24px; animation: fadeIn 0.4s ease; position: relative; }
-        .user { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2); }
+        #chat-window { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 24px; }
+        .message { max-width: 80%; padding: 16px 20px; font-size: 14px; line-height: 1.6; border-radius: 20px; position: relative; }
+        .user { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
         .bot { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; }
-        
-        .strategy-badge { position: absolute; top: -18px; left: 12px; font-size: 9px; font-weight: 900; color: var(--accent-blue); text-transform: uppercase; background: white; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .strategy-badge { position: absolute; top: -16px; left: 10px; font-size: 8px; font-weight: 900; color: var(--accent-blue); text-transform: uppercase; background: white; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--border); }
 
-        /* Input Bar */
-        .input-area { padding: 30px 15% 45px; background: white; }
-        .input-box { display: flex; gap: 15px; background: #f8fafc; padding: 14px 25px; border-radius: 50px; border: 1px solid var(--border); transition: 0.3s; }
-        .input-box:focus-within { border-color: var(--accent-blue); background: white; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.05); }
-        .input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; font-weight: 500; }
-        .send-trigger { background: var(--accent-blue); color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-        .send-trigger:hover { transform: scale(1.05); }
+        .input-area { padding: 20px 10% 30px; background: white; }
+        .input-box { display: flex; gap: 12px; background: #f8fafc; padding: 10px 15px; border-radius: 40px; border: 1px solid var(--border); }
+        .input-box input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; padding-left: 10px; }
+        .send-trigger { background: var(--accent-blue); color: white; border: none; padding: 8px 24px; border-radius: 20px; cursor: pointer; font-weight: 700; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .loading-pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .loading-text { font-size: 11px; color: var(--accent-blue); text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="profile-section">
-        <div class="profile-frame">
-            <img src="https://ui-avatars.com/api/?name=Niovi+AI&background=2563eb&color=fff&bold=true" alt="Niovi AI">
+    <div class="sidebar-header">
+        <div class="profile-section">
+            <div class="profile-frame">
+                <img src="https://ui-avatars.com/api/?name=Niovi+AI&background=2563eb&color=fff&bold=true" alt="Niovi AI">
+            </div>
+            <h1 class="persona-name">NioviAI</h1>
+            <div class="persona-title">Strategic Marketing Hub</div>
         </div>
-        <h1 class="persona-name">NioviAI</h1>
-        <div class="persona-title">Strategic Marketing Hub</div>
     </div>
 
-    <div class="widget-header">
-        <div class="widget-title">Strategic Deep Search</div>
+    <div class="sidebar-scroll-area">
+        <div class="widget-header">
+            <div class="widget-title">Intelligence Feed</div>
+            <span class="refresh-btn" onclick="fetchLiveNews()">Refresh</span>
+        </div>
+        <div id="intelligence-feed"></div>
     </div>
-    <div class="search-container">
-        <input type="text" id="news-search-input" placeholder="Αναζήτηση (π.χ. EU AI Act)...">
-        <button class="search-btn" onclick="searchStrategicNews()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </button>
-    </div>
-    
-    <div class="widget-header">
-        <div class="widget-title">Intelligence Feed</div>
-        <span class="refresh-btn" onclick="fetchLiveNews()">Refresh</span>
-    </div>
-    <div id="news-loader" class="loading-pulse" style="display:none; text-align:center; font-size:11px; color:var(--accent-blue); padding:10px;">Scanning Global Sources...</div>
-    <div id="intelligence-feed"></div>
 
-    <div class="widget-header">
-        <div class="widget-title">Strategic Knowledge Hub</div>
-    </div>
-    <div class="hub-panel">
-        <div id="cloud-status" style="font-size: 9px; color: var(--text-secondary); margin-bottom: 8px; font-weight: bold;">Firebase: Connecting...</div>
-        <textarea id="hub-input" class="hub-input" placeholder="Προσθήκη στρατηγικής γνώσης (π.χ. λεπτομέρειες για projects, hooks, νομικά updates)..."></textarea>
-        <button class="hub-btn" onclick="syncKnowledge()">Update Strategic Memory</button>
-        <div id="memory-stats" class="hub-status">0 Strategic Nodes Connected</div>
+    <div class="sidebar-footer">
+        <div class="widget-title" style="margin-bottom: 12px;">Strategic Knowledge Hub</div>
+        <div class="hub-panel">
+            <div id="cloud-status" style="font-size: 9px; color: var(--text-secondary); margin-bottom: 8px; font-weight: bold;">Firebase: Connecting...</div>
+            <textarea id="hub-input" class="hub-input" placeholder="Προσθήκη στρατηγικής γνώσης..."></textarea>
+            <button id="update-memory-btn" class="hub-btn" onclick="syncKnowledge()">Update Strategic Memory</button>
+            <div id="memory-stats" class="hub-status">0 Strategic Nodes</div>
+        </div>
     </div>
 </div>
 
@@ -165,7 +153,7 @@
     <div id="chat-window"></div>
     <div class="input-area">
         <div class="input-box">
-            <input type="text" id="user-input" placeholder="Ζητήστε ανάλυση, Content Hooks ή στρατηγικό πλάνο...">
+            <input type="text" id="user-input" placeholder="Συνομιλήστε με τη NioviAI...">
             <button class="send-trigger" onclick="handleChat()">Send</button>
         </div>
     </div>
@@ -174,9 +162,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Production Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE",
         authDomain: "niovi-ai.firebaseapp.com",
@@ -189,24 +176,50 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const APP_ID = "niovi-strategic-final-v1"; // Fixed App ID for deployment
+    const APP_ID = "niovi-strategic-final-v1"; 
 
     let userInstance = null;
     let globalKnowledgeContext = "";
+    let chatHistoryContext = "";
 
-    // Auth & Firebase Sync
     onAuthStateChanged(auth, async (user) => {
+        const statusEl = document.getElementById('cloud-status');
         if (!user) {
-            await signInAnonymously(auth);
+            try { await signInAnonymously(auth); } catch (e) { statusEl.innerText = "Firebase: Error"; }
         } else {
             userInstance = user;
-            document.getElementById('cloud-status').innerText = "Cloud Sync: Active (Firestore Connected)";
+            statusEl.innerText = "Firebase: Cloud Connected ✓";
+            statusEl.classList.add('active');
+            
+            document.getElementById('chat-window').innerHTML = "";
+            await loadChatHistory();
             startMemorySync();
+            
+            if (chatHistoryContext.trim() === "") {
+                appendMessage("NioviAI Online. Έτοιμη για στρατηγική υποστήριξη. Πώς μπορώ να σας βοηθήσω σήμερα;", 'bot');
+            }
         }
     });
 
+    async function loadChatHistory() {
+        try {
+            const q = query(
+                collection(db, 'artifacts', APP_ID, 'public', 'data', 'chat_history'),
+                orderBy('timestamp', 'asc'),
+                limit(10)
+            );
+            const querySnapshot = await getDocs(q);
+            let historyText = "";
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                appendMessage(data.text, data.role, false);
+                historyText += `${data.role}: ${data.text}\n`;
+            });
+            chatHistoryContext = historyText;
+        } catch(e) { console.error("History load error", e); }
+    }
+
     function startMemorySync() {
-        // Path matches required public structure for current rules
         const q = collection(db, 'artifacts', APP_ID, 'public', 'data', 'knowledge_hub');
         onSnapshot(q, (snapshot) => {
             let context = "";
@@ -217,130 +230,118 @@
             });
             globalKnowledgeContext = context;
             document.getElementById('memory-stats').innerText = `${count} Strategic Nodes Connected`;
-        }, (err) => {
-            console.error(err);
-            document.getElementById('cloud-status').innerText = "Cloud Sync: Error (Check Rules)";
-        });
+        }, (err) => console.error("Sync error", err));
+    }
+
+    async function saveMessageToCloud(text, role) {
+        if (!userInstance) return;
+        try {
+            await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'chat_history'), {
+                text: text,
+                role: role,
+                timestamp: new Date().toISOString(),
+                uid: userInstance.uid
+            });
+        } catch (e) { console.error("Save error", e); }
     }
 
     window.syncKnowledge = async function() {
-        const val = document.getElementById('hub-input').value.trim();
+        const input = document.getElementById('hub-input');
+        const val = input.value.trim();
+        const btn = document.getElementById('update-memory-btn');
         if (!val || !userInstance) return;
-
+        btn.innerText = "Syncing...";
+        btn.disabled = true;
         try {
             await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'knowledge_hub'), {
                 text: val,
                 timestamp: new Date().toISOString(),
                 uid: userInstance.uid
             });
-            document.getElementById('hub-input').value = "";
-            appendMessage("Strategic Hub Updated. Knowledge synced to Cloud.", 'bot');
-        } catch (e) {
-            appendMessage("Sync failed. Check Firebase settings.", 'bot');
-        }
+            input.value = "";
+            btn.innerText = "Updated ✓";
+            setTimeout(() => { btn.innerText = "Update Strategic Memory"; btn.disabled = false; }, 2000);
+        } catch (e) { btn.disabled = false; btn.innerText = "Error"; }
     }
 
-    // AI & Search Logic
-    const GEMINI_KEY = ""; // Replace with your key
+    const GEMINI_KEY = ""; 
     const MODEL_ID = "gemini-2.5-flash-preview-09-2025";
 
     window.handleChat = async function() {
         const input = document.getElementById('user-input');
         const text = input.value.trim();
         if (!text) return;
-
+        
         appendMessage(text, 'user');
+        saveMessageToCloud(text, 'user');
         input.value = "";
 
-        const systemPrompt = `
-            Persona: NioviAI - Professional Strategic Marketing Advisor.
-            Niovi Christopoulou is an Attorney/Expert in AI Law, Tech Policy, and NYC/Athens Business.
-            Strategic Context (Knowledge Hub): ${globalKnowledgeContext}
-            
-            RULES:
-            1. Be very direct and professional (concise). 
-            2. Use the Strategic Hub data as your internal logic, do not mention "database" or "hub" to the user.
-            3. If user asks for Hooks, provide 3 punchy options.
-            4. Only provide deep analysis if explicitly requested.
-            Answer in Greek unless the user asks otherwise.
-        `;
+        const systemPrompt = `Persona: NioviAI Strategic Marketing Expert. Hub Memory: ${globalKnowledgeContext}. History: ${chatHistoryContext}. Only Greek language. Professional tone.`;
 
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: systemPrompt + "\nUser Input: " + text }] }],
+                    contents: [{ parts: [{ text: systemPrompt + "\nUser: " + text }] }],
                     tools: [{ "google_search": {} }]
                 })
             });
             const data = await res.json();
-            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Δεν μπόρεσα να επεξεργαστώ το αίτημα αυτή τη στιγμή.";
+            const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Συγγνώμη, υπήρξε ένα σφάλμα.";
+            
             appendMessage(reply, 'bot');
-        } catch (e) {
-            appendMessage("Connection error with Gemini API.", 'bot');
+            saveMessageToCloud(reply, 'bot');
+            chatHistoryContext += `user: ${text}\nbot: ${reply}\n`;
+        } catch (e) { 
+            appendMessage("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.", 'bot'); 
         }
     };
 
-    function appendMessage(text, type) {
+    function appendMessage(text, type, scroll = true) {
         const win = document.getElementById('chat-window');
         const div = document.createElement('div');
-        div.className = `message ${type}`;
-        if (type === 'bot') div.innerHTML = `<div class="strategy-badge">Niovi Strategy</div>`;
+        div.className = `message ${type === 'user' ? 'user' : 'bot'}`;
+        if (type !== 'user') div.innerHTML = `<div class="strategy-badge">Niovi Strategy</div>`;
         div.innerHTML += text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         win.appendChild(div);
-        win.scrollTop = win.scrollHeight;
+        if (scroll) win.scrollTop = win.scrollHeight;
     }
 
-    // Intelligence Feed
-    window.fetchLiveNews = async function(queryStr = null) {
+    window.fetchLiveNews = async function() {
         const feed = document.getElementById('intelligence-feed');
-        const loader = document.getElementById('news-loader');
-        loader.style.display = "block";
-        feed.innerHTML = "";
-
-        const finalQuery = queryStr || "EU AI Act current news legal, Niovi Christopoulou tech business Athens NYC, 2024 Artificial Intelligence regulation updates, marketing technology advisors trends";
-
+        feed.innerHTML = "<div class='loading-text'>Scanning Intelligence...</div>";
+        
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    contents: [{ parts: [{ text: `Search for news: "${finalQuery}". Return a JSON array of 5 objects: {title, url, source, date, category}. Ensure category is specific (e.g. AI LAW, PROFILE). JSON ONLY.` }] }], 
+                    contents: [{ parts: [{ text: `Search for top 4 AI Law and Tech Marketing news for Greece/EU (Feb/March 2025). Return raw JSON array: [{"title": "...", "url": "...", "category": "..."}]. No markdown.` }] }], 
                     tools: [{ "google_search": {} }] 
                 })
             });
             const data = await res.json();
-            const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            const match = raw.match(/\[\s*\{.*\}\s*\]/s);
-            if (match) {
-                const news = JSON.parse(match[0]);
-                loader.style.display = "none";
+            let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+            rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+            
+            try {
+                const news = JSON.parse(rawText);
                 feed.innerHTML = news.map(n => `
                     <a href="${n.url}" target="_blank" class="news-card">
-                        <div class="news-meta">
-                            <span class="meta-category">${n.category || 'NEWS'}</span>
-                            <span class="meta-date">${n.date || ''}</span>
-                            <span class="meta-source">${n.source || 'GLOBAL'}</span>
-                        </div>
+                        <span class="meta-category">${n.category || 'AI LAW'}</span>
                         <div class="news-headline">${n.title}</div>
                     </a>
                 `).join('');
-            }
-        } catch (e) {
-            loader.innerText = "Error fetching intelligence. Check API Key.";
-        }
+            } catch (err) { feed.innerHTML = "Feed paused."; }
+        } catch (e) { feed.innerHTML = "Offline."; }
     }
 
-    window.searchStrategicNews = () => {
-        const q = document.getElementById('news-search-input').value;
-        fetchLiveNews(q);
-    };
+    document.getElementById('user-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleChat();
+    });
 
-    window.onload = () => {
-        appendMessage("NioviAI Online. Έτοιμη για στρατηγική υποστήριξη.", 'bot');
-        fetchLiveNews();
-    };
+    window.onload = () => fetchLiveNews();
 </script>
 </body>
 </html>
