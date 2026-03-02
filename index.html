@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Niovi AI - Strategic Workspace</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- ✅ FIX 1: Firebase Compat CDN — χωρίς type="module", όλες οι συναρτήσεις είναι global -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
     <style>
         :root {
             --bg-nav: #0f172a;
-            --bg-sidebar: #f8fafc; 
-            --bg-chat: #ffffff;
+            --bg-sidebar: #f8fafc;
             --text-main: #1e293b;
             --text-secondary: #64748b;
             --accent-blue: #2563eb;
@@ -23,140 +19,97 @@
             --sidebar-width: 320px;
             --nav-width: 80px;
         }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; color: var(--text-main); background: #fff; overflow: hidden; }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            height: 100vh; 
-            color: var(--text-main); 
-            background: var(--bg-chat);
-            overflow: hidden;
-        }
-
-        .global-nav {
-            width: var(--nav-width);
-            background: var(--bg-nav);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 24px 0;
-            gap: 24px;
-            flex-shrink: 0;
-            z-index: 50;
-        }
-
-        .logo-img {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            color: #94a3b8;
-            border: none;
-            background: transparent;
-            width: 100%;
-            padding: 12px 0;
-            transition: all 0.2s;
-        }
-
+        /* NAV */
+        .global-nav { width: var(--nav-width); background: var(--bg-nav); display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 8px; flex-shrink: 0; }
+        .logo-img { width: 44px; height: 44px; border-radius: 12px; margin-bottom: 16px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8; border: none; background: transparent; width: 100%; padding: 12px 0; transition: .2s; }
         .nav-item.active { color: white; }
-        .nav-item.active .nav-icon { background: var(--accent-blue); color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
-        
-        .nav-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: 0.2s;
+        .nav-item.active .nav-icon { background: var(--accent-blue); color: white; box-shadow: 0 4px 12px rgba(37,99,235,.4); }
+        .nav-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: .2s; }
+        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .8; }
+
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px 16px; border-bottom: 1px solid var(--border); background: white; }
+        .sidebar-header h3 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
+        .sidebar-body { flex: 1; overflow-y: auto; padding: 12px; }
+
+        /* CHAT LIST ITEMS */
+        .chat-item {
+            display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+            border-radius: 10px; margin-bottom: 6px; cursor: pointer;
+            border-left: 3px solid transparent; transition: .2s;
+            background: white; border: 1px solid var(--border);
         }
-        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
+        .chat-item:hover { border-color: var(--accent-blue); background: #eff6ff; }
+        .chat-item.active { border-color: var(--accent-blue); background: #eff6ff; border-left: 3px solid var(--accent-blue); }
+        .chat-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .chat-item-info { flex: 1; min-width: 0; }
+        .chat-item-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-item-time { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+        .chat-delete-btn { opacity: 0; background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px; border-radius: 6px; transition: .2s; color: #ef4444; flex-shrink: 0; }
+        .chat-item:hover .chat-delete-btn { opacity: 1; }
+        .chat-delete-btn:hover { background: #fee2e2; }
 
-        .sidebar-drawer {
-            width: var(--sidebar-width);
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-        }
+        /* NEW CHAT BTN */
+        .new-chat-btn { width: 100%; padding: 11px; border: 1.5px dashed var(--accent-blue); border-radius: 10px; background: #eff6ff; color: var(--accent-blue); font-weight: 700; font-size: 13px; cursor: pointer; margin-bottom: 12px; transition: .2s; }
+        .new-chat-btn:hover { background: #dbeafe; }
 
-        .drawer-header { padding: 24px 20px; border-bottom: 1px solid var(--border); background: white; }
-        .drawer-content { flex: 1; overflow-y: auto; padding: 16px; }
+        /* CHAT COLORS — cycling palette */
+        .dot-0 { background: #2563eb; }
+        .dot-1 { background: #7c3aed; }
+        .dot-2 { background: #db2777; }
+        .dot-3 { background: #ea580c; }
+        .dot-4 { background: #16a34a; }
+        .dot-5 { background: #0891b2; }
 
-        .history-item {
-            padding: 12px 16px;
-            margin-bottom: 4px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: 0.2s;
-        }
-        .history-item:hover { background: #f1f5f9; }
-        .history-item.active { background: #eff6ff; color: var(--accent-blue); }
+        /* HUB TABS */
+        .hub-tabs { display: flex; gap: 4px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+        .hub-tab-btn { flex: 1; border: none; padding: 8px; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-secondary); border-radius: 8px; background: transparent; transition: .2s; }
+        .hub-tab-btn.active { background: white; color: var(--accent-blue); box-shadow: 0 2px 4px rgba(0,0,0,.05); }
 
-        .hub-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
-        .hub-tab-btn { flex: 1; border: none; padding: 8px; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-secondary); border-radius: 8px; background: transparent; transition: 0.2s; }
-        .hub-tab-btn.active { background: white; color: var(--accent-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* NEWS */
+        .news-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .refresh-btn { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--accent-blue); transition: .2s; }
+        .refresh-btn:hover { background: #eff6ff; }
+        .news-card { display: block; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 8px; text-decoration: none; color: inherit; transition: .2s; }
+        .news-card:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+        .news-source { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; margin-bottom: 7px; display: inline-block; color: #d97706; background: #fef3c7; }
+        .news-title { font-weight: 700; font-size: 12px; color: var(--text-main); line-height: 1.4; }
+        .news-loading { text-align: center; font-size: 12px; color: var(--text-secondary); padding: 20px; }
 
-        .memory-train { margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px; }
-        .memory-input { 
-            width: 100%; height: 100px; padding: 12px; border: 1px solid var(--border); 
-            border-radius: 12px; font-family: inherit; font-size: 13px; resize: none; outline: none;
-            box-sizing: border-box;
-        }
+        /* MEMORY */
+        .memory-train { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .memory-input { width: 100%; height: 90px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 13px; resize: none; outline: none; }
         .memory-input:focus { border-color: var(--accent-blue); }
+        .memory-card { background: white; border: 1px solid #dbeafe; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+        .memory-tag { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; margin-bottom: 7px; display: inline-block; color: #2563eb; background: #dbeafe; }
+        .memory-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
 
-        .card { 
-            background: white; border: 1px solid var(--border); border-radius: 12px; 
-            padding: 14px; margin-bottom: 10px; transition: 0.2s;
-        }
-        .tag { font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
-        .tag-news { color: #d97706; background: #fef3c7; }
-        .tag-memory { color: #2563eb; background: #dbeafe; }
-        
-        .card-title { font-weight: 700; font-size: 13px; margin: 0 0 6px 0; color: var(--text-main); }
-        .card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+        /* MAIN CHAT */
+        .main-chat { flex: 1; display: flex; flex-direction: column; }
 
-        .main-chat { flex: 1; display: flex; flex-direction: column; background: white; position: relative; }
-        #chat-window { flex: 1; overflow-y: auto; padding: 40px 10%; display: flex; flex-direction: column; gap: 20px; }
-        
-        .message { max-width: 80%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
+        /* WELCOME */
+        .welcome-banner { padding: 24px 10%; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); }
+        .welcome-banner h2 { margin: 0 0 4px 0; font-size: 18px; color: var(--accent-blue); }
+        .welcome-banner p { margin: 0; font-size: 13px; color: var(--text-secondary); }
+
+        #chat-window { flex: 1; overflow-y: auto; padding: 24px 10%; display: flex; flex-direction: column; gap: 16px; }
+        .message { max-width: 80%; padding: 13px 17px; border-radius: 18px; font-size: 14px; line-height: 1.6; }
         .user { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
-        .bot { align-self: flex-start; background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        .bot { align-self: flex-start; background: #f1f5f9; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
 
-        .input-area { padding: 20px 10%; border-top: 1px solid var(--border); }
+        .input-area { padding: 16px 10%; border-top: 1px solid var(--border); }
         .input-box { display: flex; gap: 10px; background: #f8fafc; border: 1px solid var(--border); padding: 8px 16px; border-radius: 14px; align-items: center; }
         .input-box input { flex: 1; border: none; background: transparent; outline: none; padding: 8px 0; font-size: 14px; }
+        .send-btn { background: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: .2s; }
+        .send-btn:hover { background: #1d4ed8; }
 
-        .btn-action { 
-            background: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; 
-            cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 13px;
-        }
-        .btn-action:hover { background: #1d4ed8; }
-
-        .new-chat-btn {
-            width: 100%; padding: 12px; border: 1px dashed var(--accent-blue); border-radius: 10px;
-            background: #eff6ff; color: var(--accent-blue); font-weight: 600; cursor: pointer;
-            margin-bottom: 20px; transition: 0.2s;
-        }
-
-        .loading-msg { font-style: italic; opacity: 0.6; }
+        .btn-save { background: var(--accent-blue); color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: .2s; width: 100%; }
+        .btn-save:hover { background: #1d4ed8; }
     </style>
 </head>
 <body>
@@ -173,327 +126,395 @@
     </button>
 </nav>
 
-<aside class="sidebar-drawer">
-    <div class="drawer-header">
-        <h3 id="drawer-title" style="margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary);">ΣΥΝΟΜΙΛΙΕΣ</h3>
-    </div>
-    <div class="drawer-content" id="drawer-content"></div>
+<aside class="sidebar">
+    <div class="sidebar-header"><h3 id="drawer-title">ΣΥΝΟΜΙΛΙΕΣ</h3></div>
+    <div class="sidebar-body" id="drawer-content"></div>
 </aside>
 
 <main class="main-chat">
+    <div class="welcome-banner">
+        <h2>👋 Καλώς ήρθατε στη Niovi AI</h2>
+        <p>Στρατηγικός βοηθός για Τεχνολογία, Δίκαιο και Επιχειρηματικότητα — εκπαιδευμένος με εξειδικευμένα δεδομένα.</p>
+    </div>
     <div id="chat-window"></div>
     <div class="input-area">
         <div class="input-box">
             <input type="text" id="user-input" placeholder="Στείλτε ένα μήνυμα..." autocomplete="off">
-            <button class="btn-action" onclick="handleSend()">Αποστολή</button>
+            <button class="send-btn" onclick="handleSend()">Αποστολή</button>
         </div>
     </div>
 </main>
 
-<!-- ✅ FIX 1: Κανονικό script — χωρίς type="module" -->
 <script>
-    // ===================== CONFIG =====================
-    var FIREBASE_CONFIG = {
-        apiKey: "AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE",
-        authDomain: "niovi-ai.firebaseapp.com",
-        projectId: "niovi-ai",
-        storageBucket: "niovi-ai.firebasestorage.app",
-        messagingSenderId: "743828032118",
-        appId: "1:743828032118:web:fea3e038104e1c84b86d57"
-    };
+// ===================== CONFIG =====================
+var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE",
+    authDomain: "niovi-ai.firebaseapp.com",
+    projectId: "niovi-ai",
+    storageBucket: "niovi-ai.firebasestorage.app",
+    messagingSenderId: "743828032118",
+    appId: "1:743828032118:web:fea3e038104e1c84b86d57"
+};
+var GEMINI_API_KEY = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc";
+// Χρησιμοποιούμε το v1beta endpoint με gemini-pro που είναι σίγουρα διαθέσιμο
+var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_API_KEY;
+var APP_ID = 'niovi_enterprise_v2';
 
-    // ✅ FIX 2: gemini-2.0-flash — stable model, δουλεύει κανονικά στο v1beta
-    var GEMINI_API_KEY = "AIzaSyBiwqO6mBx3ng0RY58MmBvO2vBA9TZ8jFA";
-    var GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY;
+// ===================== SYSTEM PROMPT (Εκπαίδευση) =====================
+var NIOVI_SYSTEM_PROMPT = `Είσαι η Niovi AI, ένας εξειδικευμένος στρατηγικός βοηθός που έχει εκπαιδευτεί με τα δεδομένα και τη φιλοσοφία της Νιόβης Χριστοπούλου.
 
-    var APP_ID = 'niovi_enterprise_v2';
+ΤΑΥΤΟΤΗΤΑ & ΕΞΕΙΔΙΚΕΥΣΗ:
+- Είσαι ειδικός σε: Τεχνητή Νοημοσύνη (AI Act, AI ethics, AI geopolitics), Ψηφιακό Δίκαιο, Fintech, Cloud, Logistics & Ναυτιλία, Ψηφιακή Διπλωματία και Επιχειρηματικότητα
+- Γνωρίζεις σε βάθος τη σχέση τεχνολογίας και γεωπολιτικής, και πώς αυτή επηρεάζει την Ελλάδα
+- Κατανοείς τον απόδημο Ελληνισμό, το Brain Gain και τη σύνδεση Ελλάδας-Νέας Υόρκης
+- Είσαι ενήμερος για την ελληνική πολιτική, οικονομία και καινοτομία
 
-    // ===================== STATE =====================
-    var user = null;
-    var currentChatId = null;
-    var currentTab = 'chat';
-    var hubSubTab = 'news';
-    var localIntel = [];
-    var chatListUnsubscribe = null;
-    var db, auth;
+ΣΤΥΛ ΕΠΙΚΟΙΝΩΝΙΑΣ:
+- Μιλάς επαγγελματικά αλλά κατανοητά — αποφεύγεις τον ξύλινο λόγο
+- Χρησιμοποιείς παραδείγματα από τις ΗΠΑ και την Ελλάδα
+- Μπορείς να εξηγείς σύνθετες έννοιες απλά (ELI5 style)
+- Απάντα ΠΑΝΤΑ στα Ελληνικά εκτός αν ζητηθεί αλλιώς
+- Είσαι συνοπτικός και στοχευμένος — δεν κάνεις padding
 
-    var marketNews = [
-        { title: "Ανοδική πορεία στις αγορές τεχνολογίας", desc: "Οι νέες εξελίξεις στο AI φέρνουν αισιοδοξία.", source: "MarketWatch" },
-        { title: "Νέα δεδομένα στον κλάδο της ενέργειας", desc: "Σημαντικές αλλαγές στις τιμές φυσικού αερίου.", source: "Reuters" }
-    ];
+ΘΕΜΑΤΙΚΕΣ ΠΕΡΙΟΧΕΣ:
+1. AI & Τεχνολογία: AI Act Ευρώπης, αλγόριθμοι, ψηφιακά δικαιώματα, κυβερνοασφάλεια
+2. Fintech & Οικονομία: ψηφιακές πληρωμές, blockchain, ευκαιρίες για ελληνικές επιχειρήσεις
+3. Γεωπολιτική Τεχνολογίας: data sovereignty, ψηφιακή άμυνα, θέση Ελλάδας στο παγκόσμιο τεχνολογικό χάρτη
+4. Logistics & Ναυτιλία: Ελλάδα ως logistics hub, Σουέζ, τεχνολογία στη ναυτιλία
+5. Επιχειρηματικότητα: startups, επενδύσεις, σύνδεση έρευνας με αγορά, REBRAIN Greece
+6. Πολιτική & Κοινωνία: απόδημοι, ψήφος αποδήμων, δημόσιος διάλογος για τεχνολογία`;
 
-    // ===================== INIT FIREBASE =====================
-    firebase.initializeApp(FIREBASE_CONFIG);
-    auth = firebase.auth();
-    db = firebase.firestore();
+// ===================== STATE =====================
+var user = null;
+var currentChatId = null;
+var currentTab = 'chat';
+var hubSubTab = 'news';
+var localIntel = [];
+var chatListUnsubscribe = null;
+var newsCache = null;
+var db, auth;
+var chatColors = ['dot-0','dot-1','dot-2','dot-3','dot-4','dot-5'];
+var colorIndex = 0;
 
-    auth.onAuthStateChanged(function(u) {
-        user = u;
-        if (u) {
-            setupListeners();
-            syncSidebar();
-            if (!currentChatId) createNewChat();
-        }
-    });
+// ===================== FIREBASE INIT =====================
+firebase.initializeApp(FIREBASE_CONFIG);
+auth = firebase.auth();
+db = firebase.firestore();
 
-    auth.signInAnonymously().catch(function(err) {
-        console.error("Auth error:", err);
-    });
-
-    // ===================== NAVIGATION =====================
-    function setTab(tab) {
-        currentTab = tab;
-        document.querySelectorAll('.nav-item').forEach(function(i) { i.classList.remove('active'); });
-        document.getElementById('nav-' + tab).classList.add('active');
+auth.onAuthStateChanged(function(u) {
+    user = u;
+    if (u) {
+        setupKnowledgeListener();
         syncSidebar();
+        if (!currentChatId) createNewChat();
     }
+});
+auth.signInAnonymously().catch(function(e){ console.error("Auth:", e); });
 
-    function setHubSubTab(sub) {
-        hubSubTab = sub;
-        syncSidebar();
+// ===================== NAVIGATION =====================
+function setTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.nav-item').forEach(function(i){ i.classList.remove('active'); });
+    document.getElementById('nav-' + tab).classList.add('active');
+    syncSidebar();
+}
+function setHubSubTab(sub) {
+    hubSubTab = sub;
+    syncSidebar();
+}
+
+// ===================== SIDEBAR =====================
+function syncSidebar() {
+    var title = document.getElementById('drawer-title');
+    var content = document.getElementById('drawer-content');
+    if (currentTab === 'chat') {
+        title.innerText = 'ΣΥΝΟΜΙΛΙΕΣ';
+        content.innerHTML = '<button class="new-chat-btn" onclick="createNewChat()">＋ Νέα Συνομιλία</button><div id="chat-list"></div>';
+        renderChatList();
+    } else {
+        title.innerText = 'INTELLIGENCE HUB';
+        content.innerHTML =
+            '<div class="hub-tabs">' +
+                '<button class="hub-tab-btn ' + (hubSubTab==='news'?'active':'') + '" onclick="setHubSubTab(\'news\')">📰 News Feed</button>' +
+                '<button class="hub-tab-btn ' + (hubSubTab==='memory'?'active':'') + '" onclick="setHubSubTab(\'memory\')">🧠 Memory</button>' +
+            '</div>' +
+            '<div id="hub-container"></div>';
+        renderHubContent();
     }
+}
 
-    // ===================== SIDEBAR =====================
-    function syncSidebar() {
-        var title = document.getElementById('drawer-title');
-        var content = document.getElementById('drawer-content');
-
-        if (currentTab === 'chat') {
-            title.innerText = "ΣΥΝΟΜΙΛΙΕΣ";
-            content.innerHTML = '<button class="new-chat-btn" onclick="createNewChat()">+ Νέα Συνομιλία</button><div id="chat-list"></div>';
-            renderChats();
-        } else {
-            title.innerText = "INTELLIGENCE HUB";
-            content.innerHTML =
-                '<div class="hub-tabs">' +
-                    '<button class="hub-tab-btn ' + (hubSubTab === 'news' ? 'active' : '') + '" onclick="setHubSubTab(\'news\')">News Feed</button>' +
-                    '<button class="hub-tab-btn ' + (hubSubTab === 'memory' ? 'active' : '') + '" onclick="setHubSubTab(\'memory\')">Niovi Memory</button>' +
-                '</div>' +
-                '<div id="hub-container"></div>';
-            renderHubContent();
-        }
-    }
-
-    function renderHubContent() {
-        var container = document.getElementById('hub-container');
-        if (!container) return;
-
-        if (hubSubTab === 'news') {
-            container.innerHTML = marketNews.map(function(n) {
-                return '<div class="card">' +
-                    '<span class="tag tag-news">' + n.source + '</span>' +
-                    '<div class="card-title">' + n.title + '</div>' +
-                    '<div class="card-desc">' + n.desc + '</div>' +
-                    '</div>';
-            }).join('');
-        } else {
-            container.innerHTML =
-                '<div class="memory-train">' +
-                    '<textarea id="mem-input" class="memory-input" placeholder="Προσθήκη στρατηγικής πληροφορίας..."></textarea>' +
-                    '<button class="btn-action" onclick="saveToMemory()">Αποθήκευση</button>' +
-                '</div>' +
-                '<div id="memory-list"></div>';
-            renderMemoryList();
-        }
-    }
-
-    function renderMemoryList() {
-        var list = document.getElementById('memory-list');
-        if (!list) return;
-        if (localIntel.length === 0) {
-            list.innerHTML = "<p style='font-size:12px; text-align:center; color:#94a3b8; margin-top:20px;'>Κενή μνήμη.</p>";
-            return;
-        }
-        list.innerHTML = localIntel.map(function(m) {
-            return '<div class="card">' +
-                '<span class="tag tag-memory">DATA</span>' +
-                '<div class="card-desc">' + m.text + '</div>' +
-                '</div>';
-        }).join('');
-    }
-
-    // ===================== MEMORY =====================
-    function saveToMemory() {
-        var input = document.getElementById('mem-input');
-        var text = input.value.trim();
-        if (!text || !user) return;
-
-        db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('knowledge')
-          .add({ text: text, timestamp: new Date().toISOString(), userId: user.uid })
-          .then(function() { input.value = ""; })
-          .catch(function(e) { console.error("saveToMemory error:", e); });
-    }
-
-    // ===================== CHAT LIST =====================
-    function renderChats() {
-        if (chatListUnsubscribe) chatListUnsubscribe();
-
-        chatListUnsubscribe = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions')
-          .onSnapshot(function(snap) {
+// ===================== CHAT LIST =====================
+function renderChatList() {
+    if (chatListUnsubscribe) chatListUnsubscribe();
+    chatListUnsubscribe = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions')
+        .onSnapshot(function(snap) {
             var list = document.getElementById('chat-list');
             if (!list) return;
-            list.innerHTML = "";
-
             var sessions = [];
-            snap.forEach(function(d) {
-                var data = d.data();
-                data._id = d.id;
-                sessions.push(data);
-            });
-            sessions.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });
-
-            sessions.forEach(function(data) {
+            snap.forEach(function(d){ var data = d.data(); data._id = d.id; sessions.push(data); });
+            sessions.sort(function(a,b){ return new Date(b.timestamp)-new Date(a.timestamp); });
+            list.innerHTML = '';
+            sessions.forEach(function(data, idx) {
+                var colorClass = chatColors[idx % chatColors.length];
+                var isActive = data._id === currentChatId;
+                var timeStr = data.timestamp ? new Date(data.timestamp).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}) : '';
                 var div = document.createElement('div');
-                div.className = 'history-item' + (data._id === currentChatId ? ' active' : '');
-                div.innerHTML = '<span>💬</span> ' + (data.title || "Συνομιλία");
-                div.onclick = (function(id) {
-                    return function() {
-                        currentChatId = id;
-                        loadChat(id);
-                        syncSidebar();
-                    };
-                })(data._id);
+                div.className = 'chat-item' + (isActive ? ' active' : '');
+                div.id = 'chat-row-' + data._id;
+                div.innerHTML =
+                    '<div class="chat-item-dot ' + colorClass + '"></div>' +
+                    '<div class="chat-item-info">' +
+                        '<div class="chat-item-title">' + (data.title || 'Συνομιλία') + '</div>' +
+                        '<div class="chat-item-time">' + timeStr + '</div>' +
+                    '</div>' +
+                    '<button class="chat-delete-btn" onclick="deleteChat(event,\'' + data._id + '\')" title="Διαγραφή">🗑️</button>';
+                div.querySelector('.chat-item-info').onclick = (function(id){ return function(){ loadChatById(id); }; })(data._id);
                 list.appendChild(div);
             });
-        }, function(err) { console.error("Chat list error:", err); });
-    }
+        }, function(err){ console.error("Chat list:", err); });
+}
 
-    // ===================== NEW CHAT =====================
-    function createNewChat() {
-        var id = "chat_" + Date.now();
-        currentChatId = id;
-        document.getElementById('chat-window').innerHTML = "";
+function deleteChat(e, id) {
+    e.preventDefault(); e.stopPropagation();
+    if (!confirm('Να διαγραφεί η συνομιλία;')) return;
+    var row = document.getElementById('chat-row-' + id);
+    if (row) row.style.opacity = '0.3';
+    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions').doc(id)
+        .delete()
+        .then(function(){
+            if (currentChatId === id) { currentChatId = null; createNewChat(); }
+        })
+        .catch(function(e){ console.error("Delete:", e); alert('Σφάλμα διαγραφής.'); });
+}
 
-        db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions').doc(id)
-          .set({
-            title: "Ανάλυση " + new Date().toLocaleTimeString('el-GR', {hour:'2-digit', minute:'2-digit'}),
-            timestamp: new Date().toISOString()
-          })
-          .then(function() {
-            appendMessage("Γεια σας! Είμαι η Niovi. Πώς μπορώ να σας βοηθήσω σήμερα;", "bot");
-          })
-          .catch(function(e) { console.error("createNewChat error:", e); });
-    }
+// ===================== NEW CHAT =====================
+function createNewChat() {
+    var id = 'chat_' + Date.now();
+    currentChatId = id;
+    document.getElementById('chat-window').innerHTML = '';
+    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions').doc(id)
+        .set({ title: 'Ανάλυση ' + new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}), timestamp: new Date().toISOString() })
+        .then(function(){
+            appendMessage('Γεια σας! Είμαι η **Niovi AI**. Μπορώ να σας βοηθήσω με θέματα Τεχνολογίας, AI, Δικαίου, Fintech, Γεωπολιτικής και Επιχειρηματικότητας. Τι θέλετε να εξερευνήσουμε σήμερα;', 'bot');
+        })
+        .catch(function(e){ console.error("New chat:", e); });
+}
 
-    // ===================== LOAD CHAT =====================
-    function loadChat(id) {
-        var win = document.getElementById('chat-window');
-        win.innerHTML = "";
+// ===================== LOAD CHAT =====================
+function loadChatById(id) {
+    currentChatId = id;
+    var win = document.getElementById('chat-window');
+    win.innerHTML = '';
+    // Update active state in list
+    document.querySelectorAll('.chat-item').forEach(function(el){ el.classList.remove('active'); });
+    var row = document.getElementById('chat-row-' + id);
+    if (row) row.classList.add('active');
 
-        db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
-          .collection('messages').doc(id).collection('logs')
-          .get()
-          .then(function(snap) {
+    db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
+        .collection('messages').doc(id).collection('logs')
+        .get().then(function(snap){
             var msgs = [];
-            snap.forEach(function(m) { msgs.push(m.data()); });
-            msgs.sort(function(a, b) { return new Date(a.timestamp) - new Date(b.timestamp); });
-
+            snap.forEach(function(m){ msgs.push(m.data()); });
+            msgs.sort(function(a,b){ return new Date(a.timestamp)-new Date(b.timestamp); });
             if (msgs.length === 0) {
-                appendMessage("Γεια σας! Είμαι η Niovi. Πώς μπορώ να σας βοηθήσω σήμερα;", "bot");
+                appendMessage('Γεια σας! Είμαι η **Niovi AI**. Πώς μπορώ να σας βοηθήσω;', 'bot');
             } else {
-                msgs.forEach(function(m) { appendMessage(m.text, m.role); });
+                msgs.forEach(function(m){ appendMessage(m.text, m.role); });
             }
-          })
-          .catch(function(e) {
-            console.error("loadChat error:", e);
-            appendMessage("Σφάλμα φόρτωσης ιστορικού.", "bot");
-          });
-    }
+        }).catch(function(e){ console.error("Load chat:", e); });
+}
 
-    // ===================== SEND MESSAGE =====================
-    async function handleSend() {
-        var input = document.getElementById('user-input');
-        var text = input.value.trim();
-        if (!text || !user || !currentChatId) return;
-
-        appendMessage(text, 'user');
-        input.value = "";
-
-        // Αποθήκευση μηνύματος χρήστη
-        db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
-          .collection('messages').doc(currentChatId).collection('logs')
-          .add({ text: text, role: 'user', timestamp: new Date().toISOString() });
-
-        // Loading indicator
-        var loadingDiv = document.createElement('div');
-        loadingDiv.className = 'message bot loading-msg';
-        loadingDiv.id = 'loading-msg';
-        loadingDiv.innerText = '⏳ Σκέφτομαι...';
-        document.getElementById('chat-window').appendChild(loadingDiv);
-        document.getElementById('chat-window').scrollTop = 99999;
-
-        try {
-            var memText = localIntel.map(function(i) { return i.text; }).join(". ");
-            var newsText = marketNews.map(function(n) { return n.title; }).join(". ");
-
-            // ✅ FIX 3: system prompt μέσα στο contents ως πρώτο μήνυμα — πιο συμβατό
-            var systemPrompt = "Είσαι η Niovi AI, στρατηγικός βοηθός επιχειρήσεων. Απάντα στα Ελληνικά. Απάντα μόνο σε ό,τι σε ρωτάνε." +
-                (memText ? " Δεδομένα μνήμης: " + memText + "." : "") +
-                (newsText ? " Τελευταία νέα: " + newsText + "." : "");
-
-            var response = await fetch(GEMINI_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [
-                        { role: "user", parts: [{ text: systemPrompt + "\n\nΕρώτηση: " + text }] }
-                    ]
-                })
-            });
-
-            var data = await response.json();
-
-            if (!response.ok) {
-                console.error("Gemini API error:", data);
-                throw new Error("API error " + response.status);
-            }
-
-            var reply = (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0].text)
-                || "Δεν έλαβα απάντηση.";
-
-            var loading = document.getElementById('loading-msg');
-            if (loading) loading.remove();
-            appendMessage(reply, 'bot');
-
-            // Αποθήκευση απάντησης bot
-            db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
-              .collection('messages').doc(currentChatId).collection('logs')
-              .add({ text: reply, role: 'bot', timestamp: new Date().toISOString() });
-
-        } catch(e) {
-            console.error("handleSend error:", e);
-            var loading = document.getElementById('loading-msg');
-            if (loading) loading.remove();
-            appendMessage("⚠️ Σφάλμα API. Ελέγξτε το console (F12).", "bot");
+// ===================== HUB CONTENT =====================
+function renderHubContent() {
+    var container = document.getElementById('hub-container');
+    if (!container) return;
+    if (hubSubTab === 'news') {
+        container.innerHTML =
+            '<div class="news-header">' +
+                '<span style="font-size:11px; font-weight:700; color:var(--text-secondary);">ΤΕΛΕΥΤΑΙΑ ΝΕΑ</span>' +
+                '<button class="refresh-btn" onclick="fetchNews()">🔄 Refresh</button>' +
+            '</div>' +
+            '<div id="news-container"></div>';
+        if (newsCache) {
+            document.getElementById('news-container').innerHTML = newsCache;
+        } else {
+            fetchNews();
         }
+    } else {
+        container.innerHTML =
+            '<div class="memory-train">' +
+                '<textarea id="mem-input" class="memory-input" placeholder="Προσθήκη στρατηγικής πληροφορίας για εκπαίδευση..."></textarea>' +
+                '<button class="btn-save" onclick="saveToMemory()">💾 Αποθήκευση</button>' +
+            '</div>' +
+            '<div id="memory-list"></div>';
+        renderMemoryList();
     }
+}
 
-    // ===================== APPEND MESSAGE =====================
-    function appendMessage(text, role) {
-        var win = document.getElementById('chat-window');
-        if (!win) return;
-        var div = document.createElement('div');
-        div.className = 'message ' + role;
-        div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-        win.appendChild(div);
-        win.scrollTop = win.scrollHeight;
+// ===================== NEWS FEED =====================
+async function fetchNews() {
+    var container = document.getElementById('news-container');
+    if (!container) return;
+    container.innerHTML = '<div class="news-loading">🔍 Αναζήτηση άρθρων...</div>';
+
+    // Θέματα σύμφωνα με το προφίλ Νιόβης Χριστοπούλου
+    var newsPrompt = 'Search for 4 very recent real news articles (last 7 days) about these specific topics: AI Act EU regulations, Fintech Greece, digital sovereignty geopolitics, logistics shipping technology, Greek diaspora brain gain, AI technology law. For each article find the real URL. Return ONLY a raw JSON array with NO markdown, NO backticks, NO explanation: [{"title":"...","url":"https://...","source":"...","topic":"AI/Fintech/Geopolitics/Logistics"}]';
+
+    try {
+        var response = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: newsPrompt }] }]
+            })
+        });
+        var data = await response.json();
+        if (!response.ok) throw new Error((data.error && data.error.message) || 'API ' + response.status);
+
+        var raw = (data.candidates && data.candidates[0].content.parts[0].text) || '[]';
+        raw = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+        var articles = JSON.parse(raw);
+        if (!Array.isArray(articles) || articles.length === 0) throw new Error('No articles');
+
+        newsCache = articles.map(function(a) {
+            var hostname = a.url;
+            try { hostname = new URL(a.url).hostname.replace('www.',''); } catch(e){}
+            return '<a href="' + a.url + '" target="_blank" rel="noopener" class="news-card">' +
+                '<span class="news-source">' + (a.source || hostname) + '</span>' +
+                '<div class="news-title">' + a.title + '</div>' +
+                '</a>';
+        }).join('');
+        container.innerHTML = newsCache;
+    } catch(e) {
+        console.error('fetchNews:', e);
+        // Fallback static news αν αποτύχει το API
+        container.innerHTML = [
+            {title:'EU AI Act: Τι αλλάζει για τις ελληνικές επιχειρήσεις', url:'https://ec.europa.eu/digital-single-market/en/artificial-intelligence', source:'European Commission'},
+            {title:'Ψηφιακή Διπλωματία: Η νέα γεωπολιτική των δεδομένων', url:'https://www.weforum.org/agenda/2024/01/digital-diplomacy-geopolitics/', source:'World Economic Forum'},
+            {title:'Fintech στην Ελλάδα: Ευκαιρίες και προκλήσεις 2025', url:'https://www.kathimerini.gr', source:'Καθημερινή'},
+            {title:'REBRAIN Greece: Επιστροφή ταλέντων από το εξωτερικό', url:'https://rebrain.gov.gr', source:'REBRAIN Greece'}
+        ].map(function(a){
+            return '<a href="' + a.url + '" target="_blank" rel="noopener" class="news-card">' +
+                '<span class="news-source">' + a.source + '</span>' +
+                '<div class="news-title">' + a.title + '</div>' +
+                '</a>';
+        }).join('');
     }
+}
 
-    // ===================== SETUP LISTENERS =====================
-    function setupListeners() {
-        db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('knowledge')
-          .onSnapshot(function(snap) {
+// ===================== MEMORY =====================
+function renderMemoryList() {
+    var list = document.getElementById('memory-list');
+    if (!list) return;
+    if (localIntel.length === 0) {
+        list.innerHTML = '<p style="font-size:12px; text-align:center; color:#94a3b8; margin-top:16px;">Κενή μνήμη. Προσθέστε δεδομένα εκπαίδευσης.</p>';
+        return;
+    }
+    list.innerHTML = localIntel.map(function(m){
+        return '<div class="memory-card"><span class="memory-tag">DATA</span><div class="memory-text">' + m.text + '</div></div>';
+    }).join('');
+}
+
+function saveToMemory() {
+    var input = document.getElementById('mem-input');
+    var text = input.value.trim();
+    if (!text || !user) return;
+    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('knowledge')
+        .add({ text: text, timestamp: new Date().toISOString(), userId: user.uid })
+        .then(function(){ input.value = ''; })
+        .catch(function(e){ console.error('saveToMemory:', e); });
+}
+
+function setupKnowledgeListener() {
+    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('knowledge')
+        .onSnapshot(function(snap){
             localIntel = [];
-            snap.forEach(function(d) { localIntel.push(d.data()); });
+            snap.forEach(function(d){ localIntel.push(d.data()); });
             if (currentTab === 'intel' && hubSubTab === 'memory') renderMemoryList();
-          }, function(err) { console.error("Knowledge listener error:", err); });
-    }
+        }, function(e){ console.error('Knowledge:', e); });
+}
 
-    // Enter key
-    document.getElementById('user-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') handleSend();
-    });
+// ===================== SEND MESSAGE =====================
+async function handleSend() {
+    var input = document.getElementById('user-input');
+    var text = input.value.trim();
+    if (!text || !user || !currentChatId) return;
+
+    appendMessage(text, 'user');
+    input.value = '';
+    var currentId = currentChatId;
+
+    // Save user message
+    db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
+        .collection('messages').doc(currentId).collection('logs')
+        .add({ text: text, role: 'user', timestamp: new Date().toISOString() });
+
+    // Loading
+    var loadingDiv = document.createElement('div');
+    loadingDiv.className = 'message bot';
+    loadingDiv.id = 'loading-msg';
+    loadingDiv.innerHTML = '<i>⏳ Σκέφτομαι...</i>';
+    document.getElementById('chat-window').appendChild(loadingDiv);
+    document.getElementById('chat-window').scrollTop = 99999;
+
+    try {
+        var memText = localIntel.map(function(i){ return i.text; }).join(' | ');
+        var fullPrompt = NIOVI_SYSTEM_PROMPT +
+            (memText ? '\n\nΕΠΙΠΛΕΟΝ ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ:\n' + memText : '') +
+            '\n\nΕΡΩΤΗΣΗ ΧΡΗΣΤΗ: ' + text;
+
+        var response = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: fullPrompt }] }]
+            })
+        });
+
+        var data = await response.json();
+
+        if (!response.ok) {
+            var errMsg = (data.error && data.error.message) ? data.error.message : 'HTTP ' + response.status;
+            throw new Error(errMsg);
+        }
+
+        var reply = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text)
+            || 'Δεν έλαβα απάντηση.';
+
+        var loading = document.getElementById('loading-msg');
+        if (loading) loading.remove();
+        appendMessage(reply, 'bot');
+
+        // Save bot reply
+        db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
+            .collection('messages').doc(currentId).collection('logs')
+            .add({ text: reply, role: 'bot', timestamp: new Date().toISOString() });
+
+    } catch(e) {
+        console.error('handleSend:', e);
+        var loading = document.getElementById('loading-msg');
+        if (loading) loading.remove();
+        appendMessage('⚠️ ' + e.message, 'bot');
+    }
+}
+
+// ===================== APPEND MESSAGE =====================
+function appendMessage(text, role) {
+    var win = document.getElementById('chat-window');
+    if (!win) return;
+    var div = document.createElement('div');
+    div.className = 'message ' + role;
+    div.innerHTML = text
+        .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
+        .replace(/\*(.*?)\*/g,'<i>$1</i>')
+        .replace(/\n/g,'<br>');
+    win.appendChild(div);
+    win.scrollTop = win.scrollHeight;
+}
+
+document.getElementById('user-input').addEventListener('keypress', function(e){
+    if (e.key === 'Enter') handleSend();
+});
 </script>
 </body>
 </html>
-
