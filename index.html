@@ -160,7 +160,7 @@ var FIREBASE_CONFIG = {
 var WORKER_URL = "https://nioviai.isocial-workspace.workers.dev";
 
 async function geminiCall(payload, model) {
-    model = model || "gemini-2.5-flash-preview-04-17";
+    model = model || "gemini-2.5-flash";
     var response = await fetch(WORKER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -376,7 +376,7 @@ async function fetchNews() {
     var newsPrompt = 'Search for 4 very recent real news articles (last 7 days) about these specific topics: AI Act EU regulations, Fintech Greece, digital sovereignty geopolitics, logistics shipping technology, Greek diaspora brain gain, AI technology law. For each article find the real URL. Return ONLY a raw JSON array with NO markdown, NO backticks, NO explanation: [{"title":"...","url":"https://...","source":"...","topic":"AI/Fintech/Geopolitics/Logistics"}]';
 
     try {
-        var data = await geminiCall({ contents: [{ parts: [{ text: newsPrompt }] }] }, 'gemini-2.5-flash-preview-04-17');
+        var data = await geminiCall({ contents: [{ parts: [{ text: newsPrompt }] }] }, 'gemini-2.5-flash');
 
         var raw = (data.candidates && data.candidates[0].content.parts[0].text) || '[]';
         raw = raw.replace(/```json/g,'').replace(/```/g,'').trim();
@@ -470,7 +470,7 @@ async function handleSend() {
             (memText ? '\n\nΕΠΙΠΛΕΟΝ ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ:\n' + memText : '') +
             '\n\nΕΡΩΤΗΣΗ ΧΡΗΣΤΗ: ' + text;
 
-        var data = await geminiCall({ contents: [{ parts: [{ text: fullPrompt }] }] }, 'gemini-2.5-flash-preview-04-17');
+        var data = await geminiCall({ contents: [{ parts: [{ text: fullPrompt }] }] }, 'gemini-2.5-flash');
 
         var reply = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text)
             || 'Δεν έλαβα απάντηση.';
