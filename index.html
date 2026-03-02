@@ -238,8 +238,7 @@
     const db = getFirestore(app);
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'niovi-workspace-v3';
     
-    // ΣΗΜΑΝΤΙΚΟ: Το apiKey παραμένει κενό για το Canvas. 
-    // Αν το τρέχετε στο GitHub, πρέπει να ορίσετε ένα κλειδί εδώ ή το σύστημα να το τραβάει από αλλού.
+    // Ενσωματωμένο Gemini API Key για χρήση εκτός Canvas (π.χ. GitHub)
     const apiKey = "AIzaSyB4Oo2I7dzoYuQdWQs6OuMyJMYn8Bwiljc"; 
 
     let currentUser = null;
@@ -252,7 +251,7 @@
     // --- UTILS ---
     async function apiFetchWithRetry(url, options, retries = 5, delay = 1000) {
         if (!apiKey && typeof __app_id === 'undefined') {
-            throw new Error("Missing API Key. Please configure it for external domains.");
+            throw new Error("Missing Gemini API Key. Please ensure the key is correctly set in the code.");
         }
         for (let i = 0; i < retries; i++) {
             try {
@@ -478,7 +477,7 @@
             `).join('');
             renderNews();
         } catch (e) { 
-            container.innerHTML = `<div class="error-overlay">Σφάλμα φόρτωσης. ${!apiKey ? 'Λείπει το API Key.' : ''}</div>`; 
+            container.innerHTML = `<div class="error-overlay">Σφάλμα φόρτωσης. Ελέγξτε τη σύνδεση ή το API Key.</div>`; 
         }
     };
 
@@ -526,7 +525,7 @@
                 text: reply, role: 'bot', timestamp: new Date().toISOString() 
             });
         } catch (e) { 
-            appendMessage(`Σφάλμα σύνδεσης. ${!apiKey ? 'Λείπει το API Key για εξωτερική χρήση.' : 'Προσπαθήστε ξανά.'}`, 'bot'); 
+            appendMessage(`Σφάλμα σύνδεσης. Προσπαθήστε ξανά.`, 'bot'); 
         }
     };
 
@@ -544,4 +543,3 @@
 </script>
 </body>
 </html>
-
