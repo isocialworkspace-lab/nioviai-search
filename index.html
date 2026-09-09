@@ -1,519 +1,283 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Niovi AI - Strategic Workspace</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <style>
-        :root {
-            --bg-nav: #0f172a;
-            --bg-sidebar: #f8fafc;
-            --text-main: #1e293b;
-            --text-secondary: #64748b;
-            --accent-blue: #2563eb;
-            --border: #e2e8f0;
-            --sidebar-width: 320px;
-            --nav-width: 80px;
-        }
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; color: var(--text-main); background: #fff; overflow: hidden; }
-
-        /* NAV */
-        .global-nav { width: var(--nav-width); background: var(--bg-nav); display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 8px; flex-shrink: 0; }
-        .logo-img { width: 44px; height: 44px; border-radius: 12px; margin-bottom: 16px; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8; border: none; background: transparent; width: 100%; padding: 12px 0; transition: .2s; }
-        .nav-item.active { color: white; }
-        .nav-item.active .nav-icon { background: var(--accent-blue); color: white; box-shadow: 0 4px 12px rgba(37,99,235,.4); }
-        .nav-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: .2s; }
-        .nav-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .8; }
-
-        /* SIDEBAR */
-        .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px 16px; border-bottom: 1px solid var(--border); background: white; }
-        .sidebar-header h3 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); }
-        .sidebar-body { flex: 1; overflow-y: auto; padding: 12px; }
-
-        /* CHAT LIST ITEMS */
-        .chat-item {
-            display: flex; align-items: center; gap: 8px; padding: 10px 12px;
-            border-radius: 10px; margin-bottom: 6px; cursor: pointer;
-            border-left: 3px solid transparent; transition: .2s;
-            background: white; border: 1px solid var(--border);
-        }
-        .chat-item:hover { border-color: var(--accent-blue); background: #eff6ff; }
-        .chat-item.active { border-color: var(--accent-blue); background: #eff6ff; border-left: 3px solid var(--accent-blue); }
-        .chat-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .chat-item-info { flex: 1; min-width: 0; }
-        .chat-item-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chat-item-time { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
-        .chat-delete-btn { opacity: 0; background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px; border-radius: 6px; transition: .2s; color: #ef4444; flex-shrink: 0; }
-        .chat-item:hover .chat-delete-btn { opacity: 1; }
-        .chat-delete-btn:hover { background: #fee2e2; }
-
-        /* NEW CHAT BTN */
-        .new-chat-btn { width: 100%; padding: 11px; border: 1.5px dashed var(--accent-blue); border-radius: 10px; background: #eff6ff; color: var(--accent-blue); font-weight: 700; font-size: 13px; cursor: pointer; margin-bottom: 12px; transition: .2s; }
-        .new-chat-btn:hover { background: #dbeafe; }
-
-        /* CHAT COLORS — cycling palette */
-        .dot-0 { background: #2563eb; }
-        .dot-1 { background: #7c3aed; }
-        .dot-2 { background: #db2777; }
-        .dot-3 { background: #ea580c; }
-        .dot-4 { background: #16a34a; }
-        .dot-5 { background: #0891b2; }
-
-        /* HUB TABS */
-        .hub-tabs { display: flex; gap: 4px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
-        .hub-tab-btn { flex: 1; border: none; padding: 8px; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-secondary); border-radius: 8px; background: transparent; transition: .2s; }
-        .hub-tab-btn.active { background: white; color: var(--accent-blue); box-shadow: 0 2px 4px rgba(0,0,0,.05); }
-
-        /* NEWS */
-        .news-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .refresh-btn { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--accent-blue); transition: .2s; }
-        .refresh-btn:hover { background: #eff6ff; }
-        .news-card { display: block; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 8px; text-decoration: none; color: inherit; transition: .2s; }
-        .news-card:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-        .news-source { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; display: inline-block; color: #d97706; background: #fef3c7; }
-        .news-category { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; display: inline-block; color: #dc2626; background: #fee2e2; margin-left: 4px; }
-        .news-tags { margin-bottom: 7px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-        .news-date { font-size: 10px; color: var(--text-secondary); margin-top: 6px; }
-        .news-title { font-weight: 700; font-size: 12px; color: var(--text-main); line-height: 1.4; margin-bottom: 2px; }
-        .news-loading { text-align: center; font-size: 12px; color: var(--text-secondary); padding: 20px; }
-
-        /* MEMORY */
-        .memory-train { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-        .memory-input { width: 100%; height: 90px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 13px; resize: none; outline: none; }
-        .memory-input:focus { border-color: var(--accent-blue); }
-        .memory-card { background: white; border: 1px solid #dbeafe; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
-        .memory-tag { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; margin-bottom: 7px; display: inline-block; color: #2563eb; background: #dbeafe; }
-        .memory-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-
-        /* MAIN CHAT */
-        .main-chat { flex: 1; display: flex; flex-direction: column; }
-
-        /* WELCOME */
-        .welcome-banner { padding: 24px 10%; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%); }
-        .welcome-banner h2 { margin: 0 0 4px 0; font-size: 18px; color: var(--accent-blue); }
-        .welcome-banner p { margin: 0; font-size: 13px; color: var(--text-secondary); }
-
-        #chat-window { flex: 1; overflow-y: auto; padding: 24px 10%; display: flex; flex-direction: column; gap: 16px; }
-        .message { max-width: 80%; padding: 13px 17px; border-radius: 18px; font-size: 14px; line-height: 1.6; }
-        .user { align-self: flex-end; background: var(--accent-blue); color: white; border-bottom-right-radius: 4px; }
-        .bot { align-self: flex-start; background: #f1f5f9; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-
-        .input-area { padding: 16px 10%; border-top: 1px solid var(--border); }
-        .input-box { display: flex; gap: 10px; background: #f8fafc; border: 1px solid var(--border); padding: 8px 16px; border-radius: 14px; align-items: center; }
-        .input-box input { flex: 1; border: none; background: transparent; outline: none; padding: 8px 0; font-size: 14px; }
-        .send-btn { background: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: .2s; }
-        .send-btn:hover { background: #1d4ed8; }
-
-        .btn-save { background: var(--accent-blue); color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: .2s; width: 100%; }
-        .btn-save:hover { background: #1d4ed8; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPG Project Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { background-color: #111827; color: #e5e7eb; font-family: 'Courier New', Courier, monospace; }
+    .pixel-text { font-family: 'Courier New', Courier, monospace; font-weight: bold; }
+    .hero-sprite { font-size: 4rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  </style>
 </head>
 <body>
-
-<nav class="global-nav">
-    <img src="https://ui-avatars.com/api/?name=N&background=2563eb&color=fff" class="logo-img" alt="Niovi">
-    <button class="nav-item active" id="nav-chat" onclick="setTab('chat')">
-        <div class="nav-icon">💬</div>
-        <div class="nav-label">Chat</div>
-    </button>
-    <button class="nav-item" id="nav-intel" onclick="setTab('intel')">
-        <div class="nav-icon">⚡</div>
-        <div class="nav-label">Intel</div>
-    </button>
-</nav>
-
-<aside class="sidebar">
-    <div class="sidebar-header"><h3 id="drawer-title">ΣΥΝΟΜΙΛΙΕΣ</h3></div>
-    <div class="sidebar-body" id="drawer-content"></div>
-</aside>
-
-<main class="main-chat">
-    <div class="welcome-banner">
-        <h2>👋 Καλώς ήρθατε στη Niovi AI</h2>
-        <p>Στρατηγικός βοηθός για Τεχνολογία, Δίκαιο και Επιχειρηματικότητα — εκπαιδευμένος με εξειδικευμένα δεδομένα.</p>
+  <div id="root">
+    <div class="p-10 text-center text-red-400 font-bold text-xl mt-20">
+      Φόρτωση Παιχνιδιού... ⏳<br><br>
+      <span class="text-sm text-gray-400">Αν η οθόνη μείνει έτσι, ο browser σου μπλοκάρει τη React.<br>Άνοιξε το αρχείο μέσω <b>Live Server</b> (VS Code).</span>
     </div>
-    <div id="chat-window"></div>
-    <div class="input-area">
-        <div class="input-box">
-            <input type="text" id="user-input" placeholder="Στείλτε ένα μήνυμα..." autocomplete="off">
-            <button class="send-btn" onclick="handleSend()">Αποστολή</button>
-        </div>
-    </div>
-</main>
+  </div>
 
-<script>
-// ===================== CONFIG =====================
-var FIREBASE_CONFIG = {
-    apiKey: "AIzaSyC6Cp_zMV3T1eggkjLhLmf1q8RuTv9wogE",
-    authDomain: "niovi-ai.firebaseapp.com",
-    projectId: "niovi-ai",
-    storageBucket: "niovi-ai.firebasestorage.app",
-    messagingSenderId: "743828032118",
-    appId: "1:743828032118:web:fea3e038104e1c84b86d57"
-};
-// ===================== GEMINI VIA CLOUDFLARE WORKER =====================
-// Το API key είναι κρυμμένο στο Cloudflare Worker — δεν φαίνεται πουθενά εδώ
-var WORKER_URL = "https://nioviai.isocial-workspace.workers.dev";
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-async function geminiCall(payload, model) {
-    model = model || "gemini-2.5-flash";
-    var response = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: model, payload: payload })
-    });
-    var data = await response.json();
-    if (!response.ok) {
-        var errMsg = (data.error && data.error.message) ? data.error.message : "Worker error " + response.status;
-        throw new Error(errMsg);
-    }
-    return data;
-}
-var APP_ID = 'niovi_enterprise_v2';
+    const initialHero = { hp: 100, maxHp: 100, xp: 0, level: 1, gold: 50, atk: 15, def: 5 };
 
-// ===================== SYSTEM PROMPT (Εκπαίδευση) =====================
-var NIOVI_SYSTEM_PROMPT = `Είσαι η Niovi AI, ένας εξειδικευμένος στρατηγικός βοηθός που έχει εκπαιδευτεί με τα δεδομένα και τη φιλοσοφία της Νιόβης Χριστοπούλου.
+    // Ασφαλής φόρτωση δεδομένων
+    const loadData = (key, defaultData) => {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultData;
+      } catch (e) {
+        return defaultData;
+      }
+    };
 
-ΤΑΥΤΟΤΗΤΑ & ΕΞΕΙΔΙΚΕΥΣΗ:
-- Είσαι ειδικός σε: Τεχνητή Νοημοσύνη (AI Act, AI ethics, AI geopolitics), Ψηφιακό Δίκαιο, Fintech, Cloud, Logistics & Ναυτιλία, Ψηφιακή Διπλωματία και Επιχειρηματικότητα
-- Γνωρίζεις σε βάθος τη σχέση τεχνολογίας και γεωπολιτικής, και πώς αυτή επηρεάζει την Ελλάδα
-- Κατανοείς τον απόδημο Ελληνισμό, το Brain Gain και τη σύνδεση Ελλάδας-Νέας Υόρκης
-- Είσαι ενήμερος για την ελληνική πολιτική, οικονομία και καινοτομία
+    function App() {
+      // States (Με νέο κλειδί 'v3' για να αποφύγουμε corrupted saves)
+      const [hero, setHero] = useState(() => loadData('rpg_hero_v3', initialHero));
+      const [quests, setQuests] = useState(() => loadData('rpg_quests_v3', []));
+      const [logs, setLogs] = useState(() => loadData('rpg_logs_v3', ["Το παιχνίδι φορτώθηκε επιτυχώς!"]));
+      
+      const [showQuestModal, setShowQuestModal] = useState(false);
+      const [editingQuest, setEditingQuest] = useState(null);
+      const [combatTarget, setCombatTarget] = useState(null);
 
-ΣΤΥΛ ΕΠΙΚΟΙΝΩΝΙΑΣ:
-- Μιλάς επαγγελματικά αλλά κατανοητά — αποφεύγεις τον ξύλινο λόγο
-- Χρησιμοποιείς παραδείγματα από τις ΗΠΑ και την Ελλάδα
-- Μπορείς να εξηγείς σύνθετες έννοιες απλά (ELI5 style)
-- Απάντα ΠΑΝΤΑ στα Ελληνικά εκτός αν ζητηθεί αλλιώς
-- Είσαι συνοπτικός και στοχευμένος — δεν κάνεις padding
+      const [formData, setFormData] = useState({ title: '', priority: 1, difficulty: 'Easy', microtasks: '' });
 
-ΘΕΜΑΤΙΚΕΣ ΠΕΡΙΟΧΕΣ:
-1. AI & Τεχνολογία: AI Act Ευρώπης, αλγόριθμοι, ψηφιακά δικαιώματα, κυβερνοασφάλεια
-2. Fintech & Οικονομία: ψηφιακές πληρωμές, blockchain, ευκαιρίες για ελληνικές επιχειρήσεις
-3. Γεωπολιτική Τεχνολογίας: data sovereignty, ψηφιακή άμυνα, θέση Ελλάδας στο παγκόσμιο τεχνολογικό χάρτη
-4. Logistics & Ναυτιλία: Ελλάδα ως logistics hub, Σουέζ, τεχνολογία στη ναυτιλία
-5. Επιχειρηματικότητα: startups, επενδύσεις, σύνδεση έρευνας με αγορά, REBRAIN Greece
-6. Πολιτική & Κοινωνία: απόδημοι, ψήφος αποδήμων, δημόσιος διάλογος για τεχνολογία`;
+      // Auto-save σε κάθε αλλαγή
+      useEffect(() => {
+        localStorage.setItem('rpg_hero_v3', JSON.stringify(hero));
+        localStorage.setItem('rpg_quests_v3', JSON.stringify(quests));
+        localStorage.setItem('rpg_logs_v3', JSON.stringify(logs));
+      }, [hero, quests, logs]);
 
-// ===================== STATE =====================
-var user = null;
-var currentChatId = null;
-var currentTab = 'chat';
-var hubSubTab = 'news';
-var localIntel = [];
-var chatListUnsubscribe = null;
-var newsCache = null;
-var db, auth;
-var chatColors = ['dot-0','dot-1','dot-2','dot-3','dot-4','dot-5'];
-var colorIndex = 0;
+      const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 10));
 
-// ===================== FIREBASE INIT =====================
-firebase.initializeApp(FIREBASE_CONFIG);
-auth = firebase.auth();
-db = firebase.firestore();
+      // Ενεργό Quest
+      const activeQuest = quests
+        .filter(q => !q.completed)
+        .sort((a, b) => b.priority - a.priority)[0];
 
-auth.onAuthStateChanged(function(u) {
-    user = u;
-    if (u) {
-        setupKnowledgeListener();
-        syncSidebar();
-        if (!currentChatId) createNewChat();
-    }
-});
-auth.signInAnonymously().catch(function(e){ console.error("Auth:", e); });
+      // Δημιουργία/Επεξεργασία
+      const handleSaveQuest = (e) => {
+        e.preventDefault();
+        const mTasks = formData.microtasks.split(',')
+          .map(t => t.trim()).filter(t => t)
+          .map((t, i) => ({ id: i, name: t, completed: false }));
 
-// ===================== NAVIGATION =====================
-function setTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('.nav-item').forEach(function(i){ i.classList.remove('active'); });
-    document.getElementById('nav-' + tab).classList.add('active');
-    syncSidebar();
-}
-function setHubSubTab(sub) {
-    hubSubTab = sub;
-    syncSidebar();
-}
-
-// ===================== SIDEBAR =====================
-function syncSidebar() {
-    var title = document.getElementById('drawer-title');
-    var content = document.getElementById('drawer-content');
-    if (currentTab === 'chat') {
-        title.innerText = 'ΣΥΝΟΜΙΛΙΕΣ';
-        content.innerHTML = '<button class="new-chat-btn" onclick="createNewChat()">＋ Νέα Συνομιλία</button><div id="chat-list"></div>';
-        renderChatList();
-    } else {
-        title.innerText = 'INTELLIGENCE HUB';
-        content.innerHTML =
-            '<div class="hub-tabs">' +
-                '<button class="hub-tab-btn ' + (hubSubTab==='news'?'active':'') + '" onclick="setHubSubTab(\'news\')">📰 News Feed</button>' +
-                '<button class="hub-tab-btn ' + (hubSubTab==='memory'?'active':'') + '" onclick="setHubSubTab(\'memory\')">🧠 Memory</button>' +
-            '</div>' +
-            '<div id="hub-container"></div>';
-        renderHubContent();
-    }
-}
-
-// ===================== CHAT LIST =====================
-function renderChatList() {
-    if (chatListUnsubscribe) chatListUnsubscribe();
-    chatListUnsubscribe = db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions')
-        .onSnapshot(function(snap) {
-            var list = document.getElementById('chat-list');
-            if (!list) return;
-            var sessions = [];
-            snap.forEach(function(d){ var data = d.data(); data._id = d.id; sessions.push(data); });
-            sessions.sort(function(a,b){ return new Date(b.timestamp)-new Date(a.timestamp); });
-            list.innerHTML = '';
-            sessions.forEach(function(data, idx) {
-                var colorClass = chatColors[idx % chatColors.length];
-                var isActive = data._id === currentChatId;
-                var timeStr = data.timestamp ? new Date(data.timestamp).toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}) : '';
-                var div = document.createElement('div');
-                div.className = 'chat-item' + (isActive ? ' active' : '');
-                div.id = 'chat-row-' + data._id;
-                div.innerHTML =
-                    '<div class="chat-item-dot ' + colorClass + '"></div>' +
-                    '<div class="chat-item-info">' +
-                        '<div class="chat-item-title">' + (data.title || 'Συνομιλία') + '</div>' +
-                        '<div class="chat-item-time">' + timeStr + '</div>' +
-                    '</div>' +
-                    '<button class="chat-delete-btn" onclick="deleteChat(event,\'' + data._id + '\')" title="Διαγραφή">🗑️</button>';
-                div.querySelector('.chat-item-info').onclick = (function(id){ return function(){ loadChatById(id); }; })(data._id);
-                list.appendChild(div);
-            });
-        }, function(err){ console.error("Chat list:", err); });
-}
-
-function deleteChat(e, id) {
-    e.preventDefault(); e.stopPropagation();
-    if (!confirm('Να διαγραφεί η συνομιλία;')) return;
-    var row = document.getElementById('chat-row-' + id);
-    if (row) row.style.opacity = '0.3';
-    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions').doc(id)
-        .delete()
-        .then(function(){
-            if (currentChatId === id) { currentChatId = null; createNewChat(); }
-        })
-        .catch(function(e){ console.error("Delete:", e); alert('Σφάλμα διαγραφής.'); });
-}
-
-// ===================== NEW CHAT =====================
-function createNewChat() {
-    var id = 'chat_' + Date.now();
-    currentChatId = id;
-    document.getElementById('chat-window').innerHTML = '';
-    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('sessions').doc(id)
-        .set({ title: 'Ανάλυση ' + new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'}), timestamp: new Date().toISOString() })
-        .then(function(){
-            appendMessage('Γεια σας! Είμαι η **Niovi AI**. Μπορώ να σας βοηθήσω με θέματα Τεχνολογίας, AI, Δικαίου, Fintech, Γεωπολιτικής και Επιχειρηματικότητας. Τι θέλετε να εξερευνήσουμε σήμερα;', 'bot');
-        })
-        .catch(function(e){ console.error("New chat:", e); });
-}
-
-// ===================== LOAD CHAT =====================
-function loadChatById(id) {
-    currentChatId = id;
-    var win = document.getElementById('chat-window');
-    win.innerHTML = '';
-    // Update active state in list
-    document.querySelectorAll('.chat-item').forEach(function(el){ el.classList.remove('active'); });
-    var row = document.getElementById('chat-row-' + id);
-    if (row) row.classList.add('active');
-
-    db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
-        .collection('messages').doc(id).collection('logs')
-        .get().then(function(snap){
-            var msgs = [];
-            snap.forEach(function(m){ msgs.push(m.data()); });
-            msgs.sort(function(a,b){ return new Date(a.timestamp)-new Date(b.timestamp); });
-            if (msgs.length === 0) {
-                appendMessage('Γεια σας! Είμαι η **Niovi AI**. Πώς μπορώ να σας βοηθήσω;', 'bot');
-            } else {
-                msgs.forEach(function(m){ appendMessage(m.text, m.role); });
-            }
-        }).catch(function(e){ console.error("Load chat:", e); });
-}
-
-// ===================== HUB CONTENT =====================
-function renderHubContent() {
-    var container = document.getElementById('hub-container');
-    if (!container) return;
-    if (hubSubTab === 'news') {
-        container.innerHTML =
-            '<div class="news-header">' +
-                '<span style="font-size:11px; font-weight:700; color:var(--text-secondary);">ΤΕΛΕΥΤΑΙΑ ΝΕΑ</span>' +
-                '<button class="refresh-btn" onclick="fetchNews()">🔄 Refresh</button>' +
-            '</div>' +
-            '<div id="news-container"></div>';
-        if (newsCache) {
-            document.getElementById('news-container').innerHTML = newsCache;
+        if (editingQuest) {
+          setQuests(quests.map(q => q.id === editingQuest.id ? { ...q, ...formData, microtasks: mTasks } : q));
+          addLog(`Το quest "${formData.title}" ανανεώθηκε.`);
         } else {
-            fetchNews();
+          const newQuest = {
+            id: Date.now(),
+            ...formData,
+            completed: false,
+            microtasks: mTasks
+          };
+          setQuests([...quests, newQuest]);
+          addLog(`Προστέθηκε νέο Quest: "${formData.title}".`);
         }
-    } else {
-        container.innerHTML =
-            '<div class="memory-train">' +
-                '<textarea id="mem-input" class="memory-input" placeholder="Προσθήκη στρατηγικής πληροφορίας για εκπαίδευση..."></textarea>' +
-                '<button class="btn-save" onclick="saveToMemory()">💾 Αποθήκευση</button>' +
-            '</div>' +
-            '<div id="memory-list"></div>';
-        renderMemoryList();
+        setShowQuestModal(false);
+        setEditingQuest(null);
+        setFormData({ title: '', priority: 1, difficulty: 'Easy', microtasks: '' });
+      };
+
+      // Abandon
+      const abandonQuest = (quest) => {
+        if(window.confirm(`Εγκατάλειψη του "${quest.title}"; Κοστίζει 10 HP.`)) {
+          setQuests(quests.filter(q => q.id !== quest.id));
+          setHero(h => ({ ...h, hp: Math.max(0, h.hp - 10) }));
+          addLog(`Εγκατέλειψες το "${quest.title}" (-10 HP).`);
+        }
+      };
+
+      // Reset
+      const resetQuest = (quest) => {
+        if(window.confirm("Αυτό θα επαναφέρει όλα τα Mobs του Quest. Συνέχεια;")) {
+          setQuests(quests.map(q => {
+            if (q.id === quest.id) {
+              return { ...q, completed: false, microtasks: q.microtasks.map(m => ({ ...m, completed: false })) };
+            }
+            return q;
+          }));
+          addLog(`Το quest "${quest.title}" έγινε reset.`);
+        }
+      };
+
+      // Edit Modal
+      const openEdit = (quest) => {
+        setEditingQuest(quest);
+        setFormData({
+          title: quest.title, 
+          priority: quest.priority, 
+          difficulty: quest.difficulty,
+          microtasks: quest.microtasks.map(m => m.name).join(', ')
+        });
+        setShowQuestModal(true);
+      };
+
+      // Μάχη
+      const openCombat = (target, isBoss) => {
+        if (isBoss) {
+          const pending = activeQuest.microtasks.filter(m => !m.completed);
+          if (pending.length > 0) {
+            alert(`Πρέπει πρώτα να σκοτώσεις τα ${pending.length} Mobs!`);
+            return;
+          }
+        }
+        setCombatTarget({ ...target, isBoss });
+      };
+
+      const executeCombat = (action) => {
+        const enemyDmg = action === 'defend' ? 0 : (combatTarget.isBoss ? 15 : 5);
+        const xpGain = action === 'defend' ? 5 : (combatTarget.isBoss ? 100 : 20);
+        
+        setHero(h => ({ ...h, hp: Math.max(0, h.hp - enemyDmg), xp: h.xp + xpGain }));
+        
+        if (combatTarget.isBoss) {
+          setQuests(quests.map(q => q.id === activeQuest.id ? { ...q, completed: true } : q));
+          addLog(`🏆 ΝΙΚΗ! Σκότωσες το Boss: ${activeQuest.title}!`);
+        } else {
+          const updatedMicrotasks = activeQuest.microtasks.map(m => 
+            m.id === combatTarget.id ? { ...m, completed: true } : m
+          );
+          setQuests(quests.map(q => q.id === activeQuest.id ? { ...q, microtasks: updatedMicrotasks } : q));
+          addLog(`💀 Εξόντωσες το mob: ${combatTarget.name}`);
+        }
+        setCombatTarget(null);
+      };
+
+      return (
+        <div className="min-h-screen p-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Ήρωας */}
+          <div className="col-span-1 space-y-6">
+            <div className="bg-gray-800 p-4 border-2 border-gray-600 rounded">
+              <h2 className="text-xl text-yellow-400 mb-2 pixel-text">Ήρωας</h2>
+              <div className="text-center mb-4"><span className="hero-sprite">🧙‍♂️</span></div>
+              <div className="bg-gray-900 p-3 rounded font-bold space-y-1">
+                <div className="flex justify-between text-red-400"><span>HP:</span> <span>{hero.hp}/{hero.maxHp}</span></div>
+                <div className="flex justify-between text-blue-400"><span>XP:</span> <span>{hero.xp}</span></div>
+                <div className="flex justify-between text-yellow-400"><span>Gold:</span> <span>{hero.gold}</span></div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 border-2 border-gray-600 rounded h-64 overflow-y-auto">
+              <h2 className="text-xl text-blue-400 mb-2 pixel-text">Ιστορία</h2>
+              <ul className="text-xs space-y-2 text-gray-400">
+                {logs.map((log, i) => <li key={i} className="border-b border-gray-700 pb-1">> {log}</li>)}
+              </ul>
+            </div>
+          </div>
+
+          {/* Χάρτης & Quest Board */}
+          <div className="col-span-1 md:col-span-2 space-y-6">
+            
+            {/* Map */}
+            <div className="bg-gray-900 p-6 border-4 border-gray-700 rounded relative min-h-[350px]">
+              <h2 className="text-2xl text-green-400 mb-4 pixel-text border-b border-gray-700 pb-2">🏰 Ενεργό Δωμάτιο (Map)</h2>
+              
+              {!activeQuest ? (
+                <div className="text-center text-gray-500 mt-10 pixel-text">Πρόσθεσε νέο Quest στο Board!</div>
+              ) : (
+                <div className="flex flex-col items-center justify-between h-full space-y-8 mt-4">
+                  <div className="flex flex-wrap gap-6 justify-center">
+                    {activeQuest.microtasks.map(m => !m.completed && (
+                      <div key={m.id} onClick={() => openCombat(m, false)} className="cursor-pointer text-center hover:scale-110">
+                        <div className="text-5xl">👹</div>
+                        <div className="text-xs mt-2 bg-red-900 text-white px-2 py-1 rounded">{m.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div onClick={() => openCombat(activeQuest, true)} className={`cursor-pointer text-center ${activeQuest.microtasks.some(m => !m.completed) ? 'opacity-40 grayscale' : 'hover:scale-110 drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]'}`}>
+                    <div className="text-7xl mb-2">🐉</div>
+                    <div className="text-xl font-bold text-red-500 bg-black px-4 py-1 rounded-full border border-red-900">{activeQuest.title}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Board */}
+            <div className="bg-gray-800 p-4 border-2 border-gray-600 rounded">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl text-yellow-500 font-bold pixel-text">📜 Quest Board</h2>
+                <button onClick={() => { setEditingQuest(null); setShowQuestModal(true); }} className="bg-green-700 hover:bg-green-600 px-4 py-2 rounded font-bold text-white">+ Νέο Quest</button>
+              </div>
+
+              <div className="space-y-4">
+                {quests.map(quest => (
+                  <div key={quest.id} className={`bg-gray-700 p-4 rounded border-l-4 ${quest.completed ? 'border-green-500 opacity-60' : 'border-yellow-500'} flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4`}>
+                    <div>
+                      <h3 className="font-bold text-lg text-white">{quest.title}</h3>
+                      <div className="text-sm text-gray-300">Pri: {quest.priority} | Mobs: {quest.microtasks.filter(m=>m.completed).length}/{quest.microtasks.length}</div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => openEdit(quest)} className="bg-blue-700 hover:bg-blue-600 text-sm px-3 py-2 rounded font-bold text-white">✏️ Edit</button>
+                      <button onClick={() => resetQuest(quest)} className="bg-purple-700 hover:bg-purple-600 text-sm px-3 py-2 rounded font-bold text-white">🔄 Reset</button>
+                      <button onClick={() => abandonQuest(quest)} className="bg-red-700 hover:bg-red-600 text-sm px-3 py-2 rounded font-bold text-white">🏃 Abandon</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Modals */}
+          {combatTarget && (
+            <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+              <div className="bg-gray-800 p-6 border-4 border-red-600 rounded max-w-sm w-full text-center">
+                <h2 className="text-2xl text-red-500 mb-2 font-bold pixel-text">{combatTarget.isBoss ? '🐉 Boss Fight!' : '👹 Επίθεση σε Mob!'}</h2>
+                <p className="mb-6 text-white font-bold">{combatTarget.name || combatTarget.title}</p>
+                <div className="flex flex-col gap-3">
+                  <button onClick={() => executeCombat('attack')} className="bg-red-700 hover:bg-red-600 p-3 rounded font-bold text-white">⚔️ Επίθεση (DMG)</button>
+                  <button onClick={() => executeCombat('defend')} className="bg-blue-700 hover:bg-blue-600 p-3 rounded font-bold text-white">🛡️ Άμυνα (0 DMG)</button>
+                  <button onClick={() => setCombatTarget(null)} className="bg-gray-600 p-3 rounded font-bold text-white mt-2">Ακύρωση</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showQuestModal && (
+            <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+              <div className="bg-gray-800 p-6 border-2 border-yellow-600 rounded max-w-md w-full">
+                <h2 className="text-xl mb-4 text-yellow-400 font-bold pixel-text">{editingQuest ? '✏️ Επεξεργασία Quest' : 'Νέο Quest'}</h2>
+                <form onSubmit={handleSaveQuest} className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-300">Τίτλος Quest (Boss)</label>
+                    <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-gray-700 text-white p-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300">Priority (1-10)</label>
+                    <input type="number" min="1" max="10" required value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})} className="w-full bg-gray-700 text-white p-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-300">Microtasks (Χωρισμένα με κόμμα)</label>
+                    <textarea required value={formData.microtasks} onChange={e => setFormData({...formData, microtasks: e.target.value})} className="w-full bg-gray-700 text-white p-2 rounded h-24" />
+                  </div>
+                  <div className="flex gap-3 justify-end mt-6">
+                    <button type="button" onClick={() => setShowQuestModal(false)} className="bg-gray-600 px-4 py-2 rounded text-white font-bold">Ακύρωση</button>
+                    <button type="submit" className="bg-yellow-600 text-black px-4 py-2 rounded font-bold">Αποθήκευση</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
     }
-}
 
-// ===================== NEWS FEED =====================
-async function fetchNews() {
-    var container = document.getElementById('news-container');
-    if (!container) return;
-    container.innerHTML = '<div class="news-loading">🔍 Αναζήτηση άρθρων...</div>';
-
-    // Θέματα σύμφωνα με το προφίλ Νιόβης Χριστοπούλου
-    var today = new Date();
-    var maxDate = new Date(today.getTime() - 15 * 24 * 60 * 60 * 1000);
-    var newsPrompt = 'Today is March 2, 2026. Search for real news articles published in the LAST 15 DAYS ONLY (after ' + maxDate.toDateString() + ') about these topics: AI Act EU regulations, Fintech Greece, digital sovereignty geopolitics, logistics shipping technology, Greek diaspora brain gain, AI technology law, Niovi Christopoulou. For each article find the REAL URL and the EXACT publication date. Return ONLY a raw JSON array with NO markdown, NO backticks, NO explanation: [{"title":"...","url":"https://...","source":"...","category":"AI or Fintech or Geopolitics or Logistics or Niovi or Brain Gain","date":"DD Mon YYYY"}]';
-
-    try {
-        var data = await geminiCall({ contents: [{ parts: [{ text: newsPrompt }] }] }, 'gemini-2.5-flash');
-
-        var raw = (data.candidates && data.candidates[0].content.parts[0].text) || '[]';
-        raw = raw.replace(/```json/g,'').replace(/```/g,'').trim();
-        var articles = JSON.parse(raw);
-        if (!Array.isArray(articles) || articles.length === 0) throw new Error('No articles');
-
-        newsCache = articles.map(function(a) {
-            var hostname = a.url;
-            try { hostname = new URL(a.url).hostname.replace('www.',''); } catch(e){}
-            return '<a href="' + a.url + '" target="_blank" rel="noopener" class="news-card">' +
-                '<span class="news-source">' + (a.source || hostname) + '</span>' +
-                '<div class="news-title">' + a.title + '</div>' +
-                '</a>';
-        }).join('');
-        container.innerHTML = newsCache;
-    } catch(e) {
-        console.error('fetchNews:', e);
-        // Fallback static news αν αποτύχει το API
-        container.innerHTML = [
-            {title:'EU AI Act: Τι αλλάζει για τις ελληνικές επιχειρήσεις', url:'https://ec.europa.eu/digital-single-market/en/artificial-intelligence', source:'European Commission'},
-            {title:'Ψηφιακή Διπλωματία: Η νέα γεωπολιτική των δεδομένων', url:'https://www.weforum.org/agenda/2024/01/digital-diplomacy-geopolitics/', source:'World Economic Forum'},
-            {title:'Fintech στην Ελλάδα: Ευκαιρίες και προκλήσεις 2025', url:'https://www.kathimerini.gr', source:'Καθημερινή'},
-            {title:'REBRAIN Greece: Επιστροφή ταλέντων από το εξωτερικό', url:'https://rebrain.gov.gr', source:'REBRAIN Greece'}
-        ].map(function(a){
-            return '<a href="' + a.url + '" target="_blank" rel="noopener" class="news-card">' +
-                '<span class="news-source">' + a.source + '</span>' +
-                '<div class="news-title">' + a.title + '</div>' +
-                '</a>';
-        }).join('');
-    }
-}
-
-// ===================== MEMORY =====================
-function renderMemoryList() {
-    var list = document.getElementById('memory-list');
-    if (!list) return;
-    if (localIntel.length === 0) {
-        list.innerHTML = '<p style="font-size:12px; text-align:center; color:#94a3b8; margin-top:16px;">Κενή μνήμη. Προσθέστε δεδομένα εκπαίδευσης.</p>';
-        return;
-    }
-    list.innerHTML = localIntel.map(function(m){
-        return '<div class="memory-card"><span class="memory-tag">DATA</span><div class="memory-text">' + m.text + '</div></div>';
-    }).join('');
-}
-
-function saveToMemory() {
-    var input = document.getElementById('mem-input');
-    var text = input.value.trim();
-    if (!text || !user) return;
-    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('knowledge')
-        .add({ text: text, timestamp: new Date().toISOString(), userId: user.uid })
-        .then(function(){ input.value = ''; })
-        .catch(function(e){ console.error('saveToMemory:', e); });
-}
-
-function setupKnowledgeListener() {
-    db.collection('artifacts').doc(APP_ID).collection('public').doc('data').collection('knowledge')
-        .onSnapshot(function(snap){
-            localIntel = [];
-            snap.forEach(function(d){ localIntel.push(d.data()); });
-            if (currentTab === 'intel' && hubSubTab === 'memory') renderMemoryList();
-        }, function(e){ console.error('Knowledge:', e); });
-}
-
-// ===================== SEND MESSAGE =====================
-async function handleSend() {
-    var input = document.getElementById('user-input');
-    var text = input.value.trim();
-    if (!text || !user || !currentChatId) return;
-
-    appendMessage(text, 'user');
-    input.value = '';
-    var currentId = currentChatId;
-
-    // Save user message
-    db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
-        .collection('messages').doc(currentId).collection('logs')
-        .add({ text: text, role: 'user', timestamp: new Date().toISOString() });
-
-    // Loading
-    var loadingDiv = document.createElement('div');
-    loadingDiv.className = 'message bot';
-    loadingDiv.id = 'loading-msg';
-    loadingDiv.innerHTML = '<i>⏳ Σκέφτομαι...</i>';
-    document.getElementById('chat-window').appendChild(loadingDiv);
-    document.getElementById('chat-window').scrollTop = 99999;
-
-    try {
-        var memText = localIntel.map(function(i){ return i.text; }).join(' | ');
-        var fullPrompt = NIOVI_SYSTEM_PROMPT +
-            (memText ? '\n\nΕΠΙΠΛΕΟΝ ΔΕΔΟΜΕΝΑ ΜΝΗΜΗΣ:\n' + memText : '') +
-            '\n\nΕΡΩΤΗΣΗ ΧΡΗΣΤΗ: ' + text;
-
-        var data = await geminiCall({ contents: [{ parts: [{ text: fullPrompt }] }] }, 'gemini-2.5-flash');
-
-        var reply = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0].text)
-            || 'Δεν έλαβα απάντηση.';
-
-        var loading = document.getElementById('loading-msg');
-        if (loading) loading.remove();
-        appendMessage(reply, 'bot');
-
-        // Save bot reply
-        db.collection('artifacts').doc(APP_ID).collection('public').doc('data')
-            .collection('messages').doc(currentId).collection('logs')
-            .add({ text: reply, role: 'bot', timestamp: new Date().toISOString() });
-
-    } catch(e) {
-        console.error('handleSend:', e);
-        var loading = document.getElementById('loading-msg');
-        if (loading) loading.remove();
-        appendMessage('⚠️ ' + e.message, 'bot');
-    }
-}
-
-// ===================== APPEND MESSAGE =====================
-function appendMessage(text, role) {
-    var win = document.getElementById('chat-window');
-    if (!win) return;
-    var div = document.createElement('div');
-    div.className = 'message ' + role;
-    div.innerHTML = text
-        .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
-        .replace(/\*(.*?)\*/g,'<i>$1</i>')
-        .replace(/\n/g,'<br>');
-    win.appendChild(div);
-    win.scrollTop = win.scrollHeight;
-}
-
-document.getElementById('user-input').addEventListener('keypress', function(e){
-    if (e.key === 'Enter') handleSend();
-});
-</script>
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
 </body>
 </html>
