@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RPG Project Manager</title>
+  <title>RPG Project Manager - Final</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Χρησιμοποιούμε Vue.js αντί για React για να μην μπλοκάρεται από τον browser -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
     body { background-color: #111827; color: #e5e7eb; font-family: 'Courier New', Courier, monospace; }
     .pixel-text { font-family: 'Courier New', Courier, monospace; font-weight: bold; }
@@ -16,19 +15,127 @@
   </style>
 </head>
 <body>
-  <div id="root">
-    <div class="p-10 text-center text-red-400 font-bold text-xl mt-20">
-      Φόρτωση Παιχνιδιού... ⏳<br><br>
-      <span class="text-sm text-gray-400">Αν η οθόνη μείνει έτσι, ο browser σου μπλοκάρει τη React.<br>Άνοιξε το αρχείο μέσω <b>Live Server</b> (VS Code).</span>
+  <div id="app" class="min-h-screen p-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <!-- ΑΡΙΣΤΕΡΑ: Χαρακτήρας & Ιστορία -->
+    <div class="col-span-1 space-y-6">
+      <div class="bg-gray-800 p-4 border-2 border-gray-600 rounded">
+        <h2 class="text-xl text-yellow-400 mb-2 pixel-text">Ήρωας</h2>
+        <div class="text-center mb-4"><span class="hero-sprite">🧙‍♂️</span></div>
+        <div class="bg-gray-900 p-3 rounded font-bold space-y-1">
+          <div class="flex justify-between text-red-400"><span>HP:</span> <span>{{ hero.hp }}/{{ hero.maxHp }}</span></div>
+          <div class="flex justify-between text-blue-400"><span>XP:</span> <span>{{ hero.xp }}</span></div>
+          <div class="flex justify-between text-yellow-400"><span>Gold:</span> <span>{{ hero.gold }}</span></div>
+        </div>
+      </div>
+
+      <div class="bg-gray-800 p-4 border-2 border-gray-600 rounded h-64 overflow-y-auto">
+        <h2 class="text-xl text-blue-400 mb-2 pixel-text">Ιστορία</h2>
+        <ul class="text-xs space-y-2 text-gray-400">
+          <li v-for="(log, i) in logs" :key="i" class="border-b border-gray-700 pb-1">> {{ log }}</li>
+        </ul>
+      </div>
     </div>
+
+    <!-- ΚΕΝΤΡΟ & ΔΕΞΙΑ: Χάρτης & Quest Board -->
+    <div class="col-span-1 md:col-span-2 space-y-6">
+      
+      <!-- ΧΑΡΤΗΣ -->
+      <div class="bg-gray-900 p-6 border-4 border-gray-700 rounded relative min-h-[350px]">
+        <h2 class="text-2xl text-green-400 mb-4 pixel-text border-b border-gray-700 pb-2">🏰 Ενεργό Δωμάτιο (Map)</h2>
+        
+        <div v-if="!activeQuest" class="text-center text-gray-500 mt-10 pixel-text">
+          Το μπουντρούμι είναι άδειο. Πρόσθεσε νέο Quest στο Board!
+        </div>
+        
+        <div v-else class="flex flex-col items-center justify-between h-full space-y-8 mt-4">
+          <div class="flex flex-wrap gap-6 justify-center">
+            <template v-for="m in activeQuest.microtasks" :key="m.id">
+              <div v-if="!m.completed" @click="openCombat(m, false)" class="cursor-pointer text-center hover:scale-110">
+                <div class="text-5xl">👹</div>
+                <div class="text-xs mt-2 bg-red-900 text-white px-2 py-1 rounded">{{ m.name }}</div>
+              </div>
+            </template>
+          </div>
+          
+          <div @click="openCombat(activeQuest, true)" :class="['cursor-pointer text-center transition-all', hasPendingMobs ? 'opacity-40 grayscale' : 'hover:scale-110 drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]']">
+            <div class="text-7xl mb-2">🐉</div>
+            <div class="text-xl font-bold text-red-500 bg-black px-4 py-1 rounded-full border border-red-900">{{ activeQuest.title }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUEST BOARD -->
+      <div class="bg-gray-800 p-4 border-2 border-gray-600 rounded">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl text-yellow-500 font-bold pixel-text">📜 Quest Board</h2>
+          <button @click="openNewQuest" class="bg-green-700 hover:bg-green-600 px-4 py-2 rounded font-bold text-white transition-colors">+ Νέο Quest</button>
+        </div>
+
+        <div class="space-y-4">
+          <div v-for="quest in quests" :key="quest.id" :class="['bg-gray-700 p-4 rounded border-l-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4', quest.completed ? 'border-green-500 opacity-60' : 'border-yellow-500']">
+            <div>
+              <h3 class="font-bold text-lg text-white">{{ quest.title }}</h3>
+              <div class="text-sm text-gray-300">Pri: {{ quest.priority }} | Mobs: {{ countCompleted(quest.microtasks) }}/{{ quest.microtasks.length }}</div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button @click="openEdit(quest)" class="bg-blue-700 hover:bg-blue-600 text-sm px-3 py-2 rounded font-bold text-white transition-colors">✏️ Edit</button>
+              <button @click="resetQuest(quest)" class="bg-purple-700 hover:bg-purple-600 text-sm px-3 py-2 rounded font-bold text-white transition-colors">🔄 Reset</button>
+              <button @click="abandonQuest(quest)" class="bg-red-700 hover:bg-red-600 text-sm px-3 py-2 rounded font-bold text-white transition-colors">🏃 Abandon</button>
+            </div>
+          </div>
+          <div v-if="quests.length === 0" class="text-gray-500 text-center py-4">Δεν υπάρχουν quests.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODAL ΜΑΧΗΣ -->
+    <div v-if="combatTarget" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+      <div class="bg-gray-800 p-6 border-4 border-red-600 rounded max-w-sm w-full text-center">
+        <h2 class="text-2xl text-red-500 mb-2 font-bold pixel-text">{{ combatTarget.isBoss ? '🐉 Boss Fight!' : '👹 Επίθεση σε Mob!' }}</h2>
+        <p class="mb-6 text-white font-bold">{{ combatTarget.name || combatTarget.title }}</p>
+        <div class="flex flex-col gap-3">
+          <button @click="executeCombat('attack')" class="bg-red-700 hover:bg-red-600 p-3 rounded font-bold text-white">⚔️ Επίθεση (Παίρνεις DMG)</button>
+          <button @click="executeCombat('defend')" class="bg-blue-700 hover:bg-blue-600 p-3 rounded font-bold text-white">🛡️ Άμυνα (0 DMG)</button>
+          <button @click="combatTarget = null" class="bg-gray-600 hover:bg-gray-500 p-3 rounded font-bold text-white mt-2">Ακύρωση / Φυγή</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ΔΗΜΙΟΥΡΓΙΑΣ / ΕΠΕΞΕΡΓΑΣΙΑΣ QUEST -->
+    <div v-if="showQuestModal" class="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+      <div class="bg-gray-800 p-6 border-2 border-yellow-600 rounded max-w-md w-full">
+        <h2 class="text-xl mb-4 text-yellow-400 font-bold pixel-text">{{ editingQuest ? '✏️ Επεξεργασία Quest' : 'Νέο Quest' }}</h2>
+        <form @submit.prevent="handleSaveQuest" class="space-y-4">
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Τίτλος Quest (Boss)</label>
+            <input v-model="formData.title" required class="w-full bg-gray-700 text-white p-2 rounded focus:outline-none focus:border-yellow-500 border border-gray-600" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Priority (1-10)</label>
+            <input type="number" v-model="formData.priority" min="1" max="10" required class="w-full bg-gray-700 text-white p-2 rounded focus:outline-none focus:border-yellow-500 border border-gray-600" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Microtasks (Χωρισμένα με κόμμα)</label>
+            <textarea v-model="formData.microtasks" required placeholder="π.χ. Έρευνα, Κώδικας, Τεστ" class="w-full bg-gray-700 text-white p-2 rounded h-24 focus:outline-none focus:border-yellow-500 border border-gray-600"></textarea>
+          </div>
+          <div class="flex gap-3 justify-end mt-6">
+            <button type="button" @click="showQuestModal = false" class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded text-white font-bold transition-colors">Ακύρωση</button>
+            <button type="submit" class="bg-yellow-600 hover:bg-yellow-500 text-black px-4 py-2 rounded font-bold transition-colors">Αποθήκευση</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </div>
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+  <script>
+    const { createApp, ref, computed, watch } = Vue;
 
     const initialHero = { hp: 100, maxHp: 100, xp: 0, level: 1, gold: 50, atk: 15, def: 5 };
 
-    // Ασφαλής φόρτωση δεδομένων
+    // Σύστημα φόρτωσης δεδομένων (Auto-Load)
     const loadData = (key, defaultData) => {
       try {
         const item = localStorage.getItem(key);
@@ -38,246 +145,153 @@
       }
     };
 
-    function App() {
-      // States (Με νέο κλειδί 'v3' για να αποφύγουμε corrupted saves)
-      const [hero, setHero] = useState(() => loadData('rpg_hero_v3', initialHero));
-      const [quests, setQuests] = useState(() => loadData('rpg_quests_v3', []));
-      const [logs, setLogs] = useState(() => loadData('rpg_logs_v3', ["Το παιχνίδι φορτώθηκε επιτυχώς!"]));
-      
-      const [showQuestModal, setShowQuestModal] = useState(false);
-      const [editingQuest, setEditingQuest] = useState(null);
-      const [combatTarget, setCombatTarget] = useState(null);
+    createApp({
+      setup() {
+        // States
+        const hero = ref(loadData('rpg_hero_v5', initialHero));
+        const quests = ref(loadData('rpg_quests_v5', []));
+        const logs = ref(loadData('rpg_logs_v5', ["Σύστημα έτοιμο. Ξεκίνα το ταξίδι σου!"]));
 
-      const [formData, setFormData] = useState({ title: '', priority: 1, difficulty: 'Easy', microtasks: '' });
+        const showQuestModal = ref(false);
+        const editingQuest = ref(null);
+        const combatTarget = ref(null);
+        const formData = ref({ title: '', priority: 1, difficulty: 'Easy', microtasks: '' });
 
-      // Auto-save σε κάθε αλλαγή
-      useEffect(() => {
-        localStorage.setItem('rpg_hero_v3', JSON.stringify(hero));
-        localStorage.setItem('rpg_quests_v3', JSON.stringify(quests));
-        localStorage.setItem('rpg_logs_v3', JSON.stringify(logs));
-      }, [hero, quests, logs]);
+        // Σύστημα Αυτόματης Αποθήκευσης (Auto-Save)
+        watch([hero, quests, logs], () => {
+          localStorage.setItem('rpg_hero_v5', JSON.stringify(hero.value));
+          localStorage.setItem('rpg_quests_v5', JSON.stringify(quests.value));
+          localStorage.setItem('rpg_logs_v5', JSON.stringify(logs.value));
+        }, { deep: true });
 
-      const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 10));
-
-      // Ενεργό Quest
-      const activeQuest = quests
-        .filter(q => !q.completed)
-        .sort((a, b) => b.priority - a.priority)[0];
-
-      // Δημιουργία/Επεξεργασία
-      const handleSaveQuest = (e) => {
-        e.preventDefault();
-        const mTasks = formData.microtasks.split(',')
-          .map(t => t.trim()).filter(t => t)
-          .map((t, i) => ({ id: i, name: t, completed: false }));
-
-        if (editingQuest) {
-          setQuests(quests.map(q => q.id === editingQuest.id ? { ...q, ...formData, microtasks: mTasks } : q));
-          addLog(`Το quest "${formData.title}" ανανεώθηκε.`);
-        } else {
-          const newQuest = {
-            id: Date.now(),
-            ...formData,
-            completed: false,
-            microtasks: mTasks
-          };
-          setQuests([...quests, newQuest]);
-          addLog(`Προστέθηκε νέο Quest: "${formData.title}".`);
-        }
-        setShowQuestModal(false);
-        setEditingQuest(null);
-        setFormData({ title: '', priority: 1, difficulty: 'Easy', microtasks: '' });
-      };
-
-      // Abandon
-      const abandonQuest = (quest) => {
-        if(window.confirm(`Εγκατάλειψη του "${quest.title}"; Κοστίζει 10 HP.`)) {
-          setQuests(quests.filter(q => q.id !== quest.id));
-          setHero(h => ({ ...h, hp: Math.max(0, h.hp - 10) }));
-          addLog(`Εγκατέλειψες το "${quest.title}" (-10 HP).`);
-        }
-      };
-
-      // Reset
-      const resetQuest = (quest) => {
-        if(window.confirm("Αυτό θα επαναφέρει όλα τα Mobs του Quest. Συνέχεια;")) {
-          setQuests(quests.map(q => {
-            if (q.id === quest.id) {
-              return { ...q, completed: false, microtasks: q.microtasks.map(m => ({ ...m, completed: false })) };
-            }
-            return q;
-          }));
-          addLog(`Το quest "${quest.title}" έγινε reset.`);
-        }
-      };
-
-      // Edit Modal
-      const openEdit = (quest) => {
-        setEditingQuest(quest);
-        setFormData({
-          title: quest.title, 
-          priority: quest.priority, 
-          difficulty: quest.difficulty,
-          microtasks: quest.microtasks.map(m => m.name).join(', ')
+        // Υπολογισμός Ενεργού Quest (Αυτό με το υψηλότερο Priority)
+        const activeQuest = computed(() => {
+          const incomplete = quests.value.filter(q => !q.completed);
+          if (incomplete.length === 0) return null;
+          return incomplete.sort((a, b) => b.priority - a.priority)[0];
         });
-        setShowQuestModal(true);
-      };
 
-      // Μάχη
-      const openCombat = (target, isBoss) => {
-        if (isBoss) {
-          const pending = activeQuest.microtasks.filter(m => !m.completed);
-          if (pending.length > 0) {
-            alert(`Πρέπει πρώτα να σκοτώσεις τα ${pending.length} Mobs!`);
+        // Υπολογισμός εάν υπάρχουν mobs εν ζωή στο ενεργό quest
+        const hasPendingMobs = computed(() => {
+          if (!activeQuest.value) return false;
+          return activeQuest.value.microtasks.some(m => !m.completed);
+        });
+
+        // Βοηθητική μέθοδος για μέτρηση
+        const countCompleted = (microtasks) => {
+          return microtasks.filter(m => m.completed).length;
+        };
+
+        const addLog = (msg) => {
+          logs.value.unshift(msg);
+          if (logs.value.length > 10) logs.value.pop();
+        };
+
+        const openNewQuest = () => {
+          editingQuest.value = null;
+          formData.value = { title: '', priority: 1, difficulty: 'Easy', microtasks: '' };
+          showQuestModal.value = true;
+        };
+
+        const openEdit = (quest) => {
+          editingQuest.value = quest;
+          formData.value = {
+            title: quest.title,
+            priority: quest.priority,
+            difficulty: quest.difficulty || 'Easy',
+            microtasks: quest.microtasks.map(m => m.name).join(', ')
+          };
+          showQuestModal.value = true;
+        };
+
+        const handleSaveQuest = () => {
+          const mTasks = formData.value.microtasks.split(',')
+            .map(t => t.trim()).filter(t => t)
+            .map((t, i) => ({ id: i, name: t, completed: false }));
+
+          if (editingQuest.value) {
+            quests.value = quests.value.map(q => {
+              if (q.id === editingQuest.value.id) {
+                return { ...q, title: formData.value.title, priority: formData.value.priority, microtasks: mTasks };
+              }
+              return q;
+            });
+            addLog(`Το quest "${formData.value.title}" ενημερώθηκε.`);
+          } else {
+            const newQuest = {
+              id: Date.now(),
+              title: formData.value.title,
+              priority: formData.value.priority,
+              completed: false,
+              microtasks: mTasks
+            };
+            quests.value.push(newQuest);
+            addLog(`Προστέθηκε νέο Quest: "${formData.value.title}".`);
+          }
+          showQuestModal.value = false;
+        };
+
+        const abandonQuest = (quest) => {
+          if(window.confirm(`Σίγουρα θέλεις να εγκαταλείψεις το "${quest.title}"; Κοστίζει 10 HP.`)) {
+            quests.value = quests.value.filter(q => q.id !== quest.id);
+            hero.value.hp = Math.max(0, hero.value.hp - 10);
+            addLog(`Εγκατέλειψες το "${quest.title}" (-10 HP).`);
+          }
+        };
+
+        const resetQuest = (quest) => {
+          if(window.confirm("Αυτό θα επαναφέρει όλα τα Mobs του Quest. Συνέχεια;")) {
+            quests.value = quests.value.map(q => {
+              if (q.id === quest.id) {
+                return { ...q, completed: false, microtasks: q.microtasks.map(m => ({ ...m, completed: false })) };
+              }
+              return q;
+            });
+            addLog(`Το quest "${quest.title}" έγινε reset. Τα Mobs επέστρεψαν.`);
+          }
+        };
+
+        const openCombat = (target, isBoss) => {
+          if (isBoss && hasPendingMobs.value) {
+            alert("Το Boss προστατεύεται! Πρέπει πρώτα να σκοτώσεις όλα τα Mobs.");
             return;
           }
-        }
-        setCombatTarget({ ...target, isBoss });
-      };
+          combatTarget.value = { ...target, isBoss };
+        };
 
-      const executeCombat = (action) => {
-        const enemyDmg = action === 'defend' ? 0 : (combatTarget.isBoss ? 15 : 5);
-        const xpGain = action === 'defend' ? 5 : (combatTarget.isBoss ? 100 : 20);
-        
-        setHero(h => ({ ...h, hp: Math.max(0, h.hp - enemyDmg), xp: h.xp + xpGain }));
-        
-        if (combatTarget.isBoss) {
-          setQuests(quests.map(q => q.id === activeQuest.id ? { ...q, completed: true } : q));
-          addLog(`🏆 ΝΙΚΗ! Σκότωσες το Boss: ${activeQuest.title}!`);
-        } else {
-          const updatedMicrotasks = activeQuest.microtasks.map(m => 
-            m.id === combatTarget.id ? { ...m, completed: true } : m
-          );
-          setQuests(quests.map(q => q.id === activeQuest.id ? { ...q, microtasks: updatedMicrotasks } : q));
-          addLog(`💀 Εξόντωσες το mob: ${combatTarget.name}`);
-        }
-        setCombatTarget(null);
-      };
-
-      return (
-        <div className="min-h-screen p-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        const executeCombat = (action) => {
+          const enemyDmg = action === 'defend' ? 0 : (combatTarget.value.isBoss ? 15 : 5);
+          const xpGain = action === 'defend' ? 5 : (combatTarget.value.isBoss ? 100 : 20);
           
-          {/* Ήρωας */}
-          <div className="col-span-1 space-y-6">
-            <div className="bg-gray-800 p-4 border-2 border-gray-600 rounded">
-              <h2 className="text-xl text-yellow-400 mb-2 pixel-text">Ήρωας</h2>
-              <div className="text-center mb-4"><span className="hero-sprite">🧙‍♂️</span></div>
-              <div className="bg-gray-900 p-3 rounded font-bold space-y-1">
-                <div className="flex justify-between text-red-400"><span>HP:</span> <span>{hero.hp}/{hero.maxHp}</span></div>
-                <div className="flex justify-between text-blue-400"><span>XP:</span> <span>{hero.xp}</span></div>
-                <div className="flex justify-between text-yellow-400"><span>Gold:</span> <span>{hero.gold}</span></div>
-              </div>
-            </div>
+          hero.value.hp = Math.max(0, hero.value.hp - enemyDmg);
+          hero.value.xp += xpGain;
+          
+          if (combatTarget.value.isBoss) {
+            quests.value = quests.value.map(q => q.id === activeQuest.value.id ? { ...q, completed: true } : q);
+            addLog(`🏆 ΝΙΚΗ! Σκότωσες το Boss: ${activeQuest.value.title}!`);
+          } else {
+            quests.value = quests.value.map(q => {
+              if (q.id === activeQuest.value.id) {
+                const updatedMicrotasks = q.microtasks.map(m => 
+                  m.id === combatTarget.value.id ? { ...m, completed: true } : m
+                );
+                return { ...q, microtasks: updatedMicrotasks };
+              }
+              return q;
+            });
+            addLog(`💀 Εξόντωσες το mob: ${combatTarget.value.name}`);
+          }
+          combatTarget.value = null;
+        };
 
-            <div className="bg-gray-800 p-4 border-2 border-gray-600 rounded h-64 overflow-y-auto">
-              <h2 className="text-xl text-blue-400 mb-2 pixel-text">Ιστορία</h2>
-              <ul className="text-xs space-y-2 text-gray-400">
-                {logs.map((log, i) => <li key={i} className="border-b border-gray-700 pb-1">> {log}</li>)}
-              </ul>
-            </div>
-          </div>
-
-          {/* Χάρτης & Quest Board */}
-          <div className="col-span-1 md:col-span-2 space-y-6">
-            
-            {/* Map */}
-            <div className="bg-gray-900 p-6 border-4 border-gray-700 rounded relative min-h-[350px]">
-              <h2 className="text-2xl text-green-400 mb-4 pixel-text border-b border-gray-700 pb-2">🏰 Ενεργό Δωμάτιο (Map)</h2>
-              
-              {!activeQuest ? (
-                <div className="text-center text-gray-500 mt-10 pixel-text">Πρόσθεσε νέο Quest στο Board!</div>
-              ) : (
-                <div className="flex flex-col items-center justify-between h-full space-y-8 mt-4">
-                  <div className="flex flex-wrap gap-6 justify-center">
-                    {activeQuest.microtasks.map(m => !m.completed && (
-                      <div key={m.id} onClick={() => openCombat(m, false)} className="cursor-pointer text-center hover:scale-110">
-                        <div className="text-5xl">👹</div>
-                        <div className="text-xs mt-2 bg-red-900 text-white px-2 py-1 rounded">{m.name}</div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div onClick={() => openCombat(activeQuest, true)} className={`cursor-pointer text-center ${activeQuest.microtasks.some(m => !m.completed) ? 'opacity-40 grayscale' : 'hover:scale-110 drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]'}`}>
-                    <div className="text-7xl mb-2">🐉</div>
-                    <div className="text-xl font-bold text-red-500 bg-black px-4 py-1 rounded-full border border-red-900">{activeQuest.title}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Board */}
-            <div className="bg-gray-800 p-4 border-2 border-gray-600 rounded">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl text-yellow-500 font-bold pixel-text">📜 Quest Board</h2>
-                <button onClick={() => { setEditingQuest(null); setShowQuestModal(true); }} className="bg-green-700 hover:bg-green-600 px-4 py-2 rounded font-bold text-white">+ Νέο Quest</button>
-              </div>
-
-              <div className="space-y-4">
-                {quests.map(quest => (
-                  <div key={quest.id} className={`bg-gray-700 p-4 rounded border-l-4 ${quest.completed ? 'border-green-500 opacity-60' : 'border-yellow-500'} flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4`}>
-                    <div>
-                      <h3 className="font-bold text-lg text-white">{quest.title}</h3>
-                      <div className="text-sm text-gray-300">Pri: {quest.priority} | Mobs: {quest.microtasks.filter(m=>m.completed).length}/{quest.microtasks.length}</div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      <button onClick={() => openEdit(quest)} className="bg-blue-700 hover:bg-blue-600 text-sm px-3 py-2 rounded font-bold text-white">✏️ Edit</button>
-                      <button onClick={() => resetQuest(quest)} className="bg-purple-700 hover:bg-purple-600 text-sm px-3 py-2 rounded font-bold text-white">🔄 Reset</button>
-                      <button onClick={() => abandonQuest(quest)} className="bg-red-700 hover:bg-red-600 text-sm px-3 py-2 rounded font-bold text-white">🏃 Abandon</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Modals */}
-          {combatTarget && (
-            <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-              <div className="bg-gray-800 p-6 border-4 border-red-600 rounded max-w-sm w-full text-center">
-                <h2 className="text-2xl text-red-500 mb-2 font-bold pixel-text">{combatTarget.isBoss ? '🐉 Boss Fight!' : '👹 Επίθεση σε Mob!'}</h2>
-                <p className="mb-6 text-white font-bold">{combatTarget.name || combatTarget.title}</p>
-                <div className="flex flex-col gap-3">
-                  <button onClick={() => executeCombat('attack')} className="bg-red-700 hover:bg-red-600 p-3 rounded font-bold text-white">⚔️ Επίθεση (DMG)</button>
-                  <button onClick={() => executeCombat('defend')} className="bg-blue-700 hover:bg-blue-600 p-3 rounded font-bold text-white">🛡️ Άμυνα (0 DMG)</button>
-                  <button onClick={() => setCombatTarget(null)} className="bg-gray-600 p-3 rounded font-bold text-white mt-2">Ακύρωση</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showQuestModal && (
-            <div className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-              <div className="bg-gray-800 p-6 border-2 border-yellow-600 rounded max-w-md w-full">
-                <h2 className="text-xl mb-4 text-yellow-400 font-bold pixel-text">{editingQuest ? '✏️ Επεξεργασία Quest' : 'Νέο Quest'}</h2>
-                <form onSubmit={handleSaveQuest} className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-300">Τίτλος Quest (Boss)</label>
-                    <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-gray-700 text-white p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-300">Priority (1-10)</label>
-                    <input type="number" min="1" max="10" required value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})} className="w-full bg-gray-700 text-white p-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-300">Microtasks (Χωρισμένα με κόμμα)</label>
-                    <textarea required value={formData.microtasks} onChange={e => setFormData({...formData, microtasks: e.target.value})} className="w-full bg-gray-700 text-white p-2 rounded h-24" />
-                  </div>
-                  <div className="flex gap-3 justify-end mt-6">
-                    <button type="button" onClick={() => setShowQuestModal(false)} className="bg-gray-600 px-4 py-2 rounded text-white font-bold">Ακύρωση</button>
-                    <button type="submit" className="bg-yellow-600 text-black px-4 py-2 rounded font-bold">Αποθήκευση</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+        return {
+          hero, quests, logs, showQuestModal, editingQuest, combatTarget, formData,
+          activeQuest, hasPendingMobs, countCompleted,
+          openNewQuest, openEdit, handleSaveQuest, abandonQuest, resetQuest,
+          openCombat, executeCombat
+        };
+      }
+    }).mount('#app');
   </script>
 </body>
 </html>
